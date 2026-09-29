@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Monitoring Rak Server - MQTT</title>
+<script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+<style>
+:root{--bg:#f4f7fb;--card:#fff;--text:#0f172a;--sub:#64748b;--accent:#0d6efd;--accent-2:#14b8a6;--ok:#10b981;--warn:#f59e0b;--hot:#ef4444;--cold:#3b82f6;--border:#e5eaf1;--shadow:0 2px 8px rgba(15,23,42,.04);--chip:#f1f5f9;}
+body.night{--bg:#0b1220;--card:#131c2e;--text:#f1f5f9;--sub:#94a3b8;--accent:#3b82f6;--accent-2:#2dd4bf;--ok:#34d399;--warn:#fbbf24;--hot:#f87171;--cold:#60a5fa;--border:#1e293b;--chip:#1e293b;}
+*{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,"Segoe UI",Roboto,sans-serif;}
+body{background:var(--bg);color:var(--text);padding:18px;min-height:100vh;}
+.wrap{max-width:1280px;margin:0 auto;}
+.header{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px 22px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;box-shadow:var(--shadow);margin-bottom:14px;}
+.logo{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.4rem;flex-shrink:0;}
+.title-block{flex:1;min-width:200px;}
+.title-block h1{font-size:1.25rem;font-weight:700;}
+.title-block .sub{font-size:.8rem;color:var(--sub);margin-top:2px;}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.toolbar button{background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:999px;padding:8px 16px;font-size:.85rem;cursor:pointer;font-weight:500;}
+.toolbar button:hover{border-color:var(--accent);color:var(--accent);}
+.statusbar{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px 20px;display:flex;gap:26px;flex-wrap:wrap;font-size:.85rem;margin-bottom:14px;}
+.statusbar .item{display:flex;align-items:center;gap:8px;color:var(--sub);}
+.statusbar .item b{color:var(--text);font-weight:600;}
+.dot{width:8px;height:8px;border-radius:50%;background:#94a3b8;display:inline-block;}
+.dot.on{background:var(--ok);animation:pulse 1.6s infinite;}
+.dot.off{background:var(--hot);}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 3px rgba(16,185,129,.2);}50%{box-shadow:0 0 0 6px rgba(16,185,129,0);}}
+.banner{background:#fff7e6;border:1px solid #fde68a;border-left:4px solid var(--warn);border-radius:12px;padding:12px 18px;font-size:.85rem;color:#78350f;margin-bottom:14px;}
+.sensor-grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));margin-bottom:18px;}
+.sensor-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;box-shadow:var(--shadow);}
+.sensor-card.primary{border:2px solid var(--accent);}
+.sensor-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+.sensor-head .name{font-size:.95rem;font-weight:700;}
+.sensor-head .badge{background:var(--chip);border-radius:999px;padding:4px 12px;font-size:.75rem;color:var(--sub);font-weight:600;}
+.visual{height:220px;border-radius:12px;overflow:hidden;position:relative;background:linear-gradient(180deg,#dbeafe,#f0f9ff);margin-bottom:14px;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;}
+.visual .readout{position:absolute;top:8px;left:50%;transform:translateX(-50%);font-size:1.5rem;font-weight:800;color:#0f172a;z-index:10;background:rgba(255,255,255,0.9);padding:4px 16px;border-radius:999px;border:2px solid rgba(13,110,253,.3);box-shadow:0 3px 10px rgba(0,0,0,.12);}
+body.night .visual .readout{background:rgba(30,41,59,.9);color:#f1f5f9;border-color:rgba(59,130,246,.5);}
+.visual .readout .u{font-size:.85rem;color:#475569;margin-left:2px;font-weight:600;}
+.illus-wrap{position:relative;width:150px;height:190px;}
+.illus-wrap svg{width:100%;height:100%;display:block;}
+.rack-led{animation:blink 2s infinite;}
+.rack-led.fast{animation:blink .6s infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.35;}}
+.illus-wrap.active.cold-active{filter:drop-shadow(0 0 18px rgba(59,130,246,.7));}
+.peltier-fan-g{transform-origin:75px 75px;transform-box:view-box;}
+.illus-wrap.active .peltier-fan-g{animation:spin 1s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.cold-mist,.cold-particle{opacity:0;}
+.illus-wrap.active .cold-mist{opacity:1;animation:mistRise 2.5s ease-out infinite;}
+.illus-wrap.active .cold-particle{opacity:1;animation:particleUp 2.2s linear infinite;}
+@keyframes mistRise{0%{opacity:0;transform:translateY(6px);}20%{opacity:.75;}100%{opacity:0;transform:translateY(-22px);}}
+@keyframes particleUp{0%{opacity:0;transform:translate(0,0) scale(.6);}15%{opacity:1;}100%{opacity:0;transform:translate(-10px,-42px) scale(.4);}}
+.stats{display:flex;justify-content:space-between;gap:8px;font-size:.78rem;}
+.stats .st{flex:1;text-align:center;padding:8px 4px;border-radius:10px;background:var(--chip);}
+.stats .st .lbl{color:var(--sub);font-size:.7rem;text-transform:uppercase;}
+.stats .st .val{font-weight:700;font-size:.9rem;margin-top:2px;}
+.mode-section{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px 20px;box-shadow:var(--shadow);margin-bottom:18px;}
+.mode-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px;}
+.mode-header h2{font-size:1rem;font-weight:700;}
+.mode-btns{display:flex;gap:10px;}
+.mode-btn{background:var(--card);color:var(--text);border:2px solid var(--border);border-radius:999px;padding:10px 24px;font-size:.9rem;cursor:pointer;font-weight:700;display:flex;align-items:center;gap:8px;}
+.mode-btn.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.mode-btn.active.manual-active{background:var(--warn);border-color:var(--warn);}
+.manual-grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));}
+.manual-card{background:var(--chip);border:1px solid var(--border);border-radius:14px;padding:16px;display:flex;flex-direction:column;align-items:center;gap:12px;}
+.manual-card.on{border-color:var(--ok);box-shadow:0 0 0 3px rgba(16,185,129,.15);}
+.manual-card.on.peltier-on{border-color:var(--cold);box-shadow:0 0 0 3px rgba(59,130,246,.15);}
+.manual-card h3{font-size:.85rem;font-weight:700;display:flex;align-items:center;gap:6px;}
+.manual-card h3 .badge-on{font-size:.65rem;padding:2px 8px;border-radius:999px;background:rgba(16,185,129,.15);color:var(--ok);}
+.manual-card h3 .badge-off{font-size:.65rem;padding:2px 8px;border-radius:999px;background:rgba(148,163,184,.15);color:var(--sub);}
+.manual-visual{width:100px;height:100px;}
+.manual-visual svg{width:100%;height:100%;}
+.manual-visual .spin-group{transform-origin:50px 50px;transform-box:view-box;}
+.manual-card.on .manual-visual .spin-group{animation:spin 1s linear infinite;}
+.manual-card.on.peltier-on .manual-visual .spin-group{animation:spin 2s linear infinite;}
+.switch-big{position:relative;display:inline-block;width:60px;height:32px;cursor:pointer;}
+.switch-big input{display:none;}
+.switch-big .slider{position:absolute;inset:0;background:var(--sub);border-radius:999px;transition:.3s;}
+.switch-big .slider::before{content:'';position:absolute;width:24px;height:24px;background:#fff;border-radius:50%;top:4px;left:4px;transition:.3s;}
+.switch-big input:checked + .slider{background:var(--ok);}
+.switch-big input:checked + .slider::before{transform:translateX(28px);}
+.switch-big.peltier-switch input:checked + .slider{background:var(--cold);}
+.switch-label{font-size:.7rem;color:var(--sub);text-transform:uppercase;font-weight:600;}
+.chart-wrap{position:relative;height:220px;margin-bottom:8px;}
+canvas{width:100%;height:100%;display:block;}
+footer{text-align:center;color:var(--sub);font-size:.75rem;padding:24px 0 8px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <div class="logo">&#127777;</div>
+    <div class="title-block">
+      <h1>Monitoring Suhu Rak Server</h1>
+      <div class="sub">ESP32-S3 &middot; MQTT Cloud &middot; Vercel Hosted</div>
+    </div>
+    <div class="toolbar">
+      <button id="themeBtn" onclick="toggleTheme()">&#127769; Malam</button>
+    </div>
+  </div>
+
+  <div class="banner">
+    <b>Info:</b> Data dikirim via MQTT broker publik. Kontrol relay hanya aktif saat mode MANUAL.
+  </div>
+
+  <div class="statusbar">
+    <div class="item"><span class="dot" id="mqttDot"></span> MQTT: <b id="mqttStatus">Menghubungkan...</b></div>
+    <div class="item">Device: <b id="deviceStatus">Offline</b></div>
+    <div class="item">Server time: <b id="serverTime">--</b></div>
+    <div class="item">Last update: <b id="lastUpdate">--</b></div>
+    <div class="item">RSSI: <b id="rssi">--</b></div>
+    <div class="item">IP: <b id="ip">--</b></div>
+    <div class="item">Heap: <b id="heap">--</b></div>
+  </div>
+
+  <div class="sensor-grid">
+    <div class="sensor-card primary">
+      <div class="sensor-head">
+        <div class="name">&#127777; Suhu Rak Server</div>
+        <div class="badge" id="badgeRak">Menunggu</div>
+      </div>
+      <div class="visual">
+        <div class="readout"><span id="tRak">--</span><span class="u">&deg;C</span></div>
+        <div class="illus-wrap" id="rackWrap">
+          <svg viewBox="0 0 150 190">
+            <rect x="25" y="175" width="10" height="10" rx="2" fill="#1e293b"/>
+            <rect x="115" y="175" width="10" height="10" rx="2" fill="#1e293b"/>
+            <rect x="20" y="35" width="110" height="145" rx="6" fill="#334155" stroke="#0f172a" stroke-width="2"/>
+            <rect x="25" y="40" width="100" height="135" rx="4" fill="#1e293b"/>
+            <rect x="30" y="45" width="90" height="28" rx="3" fill="#475569" stroke="#0f172a" stroke-width="1.5"/>
+            <circle class="rack-led" cx="38" cy="59" r="2.5" fill="#22c55e"/>
+            <rect x="54" y="55" width="30" height="8" rx="1.5" fill="#0f172a"/>
+            <rect x="88" y="55" width="28" height="8" rx="1.5" fill="#0f172a"/>
+            <rect x="30" y="77" width="90" height="28" rx="3" fill="#475569" stroke="#0f172a" stroke-width="1.5"/>
+            <circle class="rack-led" cx="38" cy="91" r="2.5" fill="#22c55e"/>
+            <rect x="54" y="87" width="30" height="8" rx="1.5" fill="#0f172a"/>
+            <rect x="88" y="87" width="28" height="8" rx="1.5" fill="#0f172a"/>
+            <rect x="30" y="109" width="90" height="28" rx="3" fill="#475569" stroke="#0f172a" stroke-width="1.5"/>
+            <circle class="rack-led" cx="38" cy="123" r="2.5" fill="#22c55e"/>
+            <rect x="54" y="119" width="30" height="8" rx="1.5" fill="#0f172a"/>
+            <rect x="88" y="119" width="28" height="8" rx="1.5" fill="#0f172a"/>
+            <rect x="30" y="141" width="90" height="28" rx="3" fill="#475569" stroke="#0f172a" stroke-width="1.5"/>
+            <circle class="rack-led" cx="38" cy="155" r="2.5" fill="#22c55e"/>
+            <rect x="54" y="151" width="30" height="8" rx="1.5" fill="#0f172a"/>
+            <rect x="88" y="151" width="28" height="8" rx="1.5" fill="#0f172a"/>
+          </svg>
+        </div>
+      </div>
+      <div class="stats">
+        <div class="st"><div class="lbl">Kelembapan</div><div class="val"><span id="rh">--</span>%</div></div>
+        <div class="st"><div class="lbl">Setpoint</div><div class="val">18-28&deg;C</div></div>
+        <div class="st"><div class="lbl">Status</div><div class="val" id="statusRakTxt">--</div></div>
+      </div>
+    </div>
+
+    <div class="sensor-card">
+      <div class="sensor-head">
+        <div class="name">&#10052; Peltier 1</div>
+        <div class="badge">DS18B20 #1</div>
+      </div>
+      <div class="visual">
+        <div class="readout"><span id="tPel1">--</span><span class="u">&deg;C</span></div>
+        <div class="illus-wrap" id="pelWrap1">
+          <svg viewBox="0 0 150 190">
+            <rect x="35" y="135" width="80" height="40" rx="4" fill="#1e40af" stroke="#0f172a" stroke-width="2"/>
+            <rect x="38" y="120" width="4" height="18" fill="#334155"/>
+            <rect x="46" y="120" width="4" height="18" fill="#334155"/>
+            <rect x="54" y="120" width="4" height="18" fill="#334155"/>
+            <rect x="62" y="120" width="4" height="18" fill="#334155"/>
+            <rect x="84" y="120" width="4" height="18" fill="#334155"/>
+            <rect x="92" y="120" width="4" height="18" fill="#334155"/>
+            <rect x="100" y="120" width="4" height="18" fill="#334155"/>
+            <rect x="108" y="120" width="4" height="18" fill="#334155"/>
+            <circle class="led-dot" cx="108" cy="142" r="3" fill="#475569"/>
+            <circle cx="75" cy="75" r="42" fill="none" stroke="#0f172a" stroke-width="3"/>
+            <circle cx="75" cy="75" r="37" fill="#e2e8f0"/>
+            <g class="peltier-fan-g">
+              <path d="M 75 75 C 60 70, 48 58, 55 42 C 62 32, 78 38, 82 48 C 84 56, 80 68, 75 75 Z" fill="#0f172a"/>
+              <path d="M 75 75 C 60 70, 48 58, 55 42 C 62 32, 78 38, 82 48 C 84 56, 80 68, 75 75 Z" fill="#0f172a" transform="rotate(120 75 75)"/>
+              <path d="M 75 75 C 60 70, 48 58, 55 42 C 62 32, 78 38, 82 48 C 84 56, 80 68, 75 75 Z" fill="#0f172a" transform="rotate(240 75 75)"/>
+            </g>
+            <circle cx="75" cy="75" r="11" fill="#e2e8f0" stroke="#0f172a" stroke-width="2.5"/>
+            <circle cx="75" cy="75" r="4" fill="#0f172a"/>
+            <g class="cold-mist">
+              <circle cx="75" cy="42" r="12" fill="rgba(96,165,250,.35)"/>
+              <circle cx="60" cy="38" r="8" fill="rgba(96,165,250,.25)"/>
+              <circle cx="90" cy="38" r="8" fill="rgba(96,165,250,.25)"/>
+            </g>
+            <circle class="cold-particle c1" cx="65" cy="110" r="2.5" fill="#60a5fa"/>
+            <circle class="cold-particle c2" cx="80" cy="105" r="2" fill="#60a5fa"/>
+            <circle class="cold-particle c3" cx="72" cy="108" r="2" fill="#60a5fa"/>
+            <circle class="cold-particle c4" cx="88" cy="110" r="2.5" fill="#60a5fa"/>
+          </svg>
+        </div>
+      </div>
+      <div class="stats">
+        <div class="st"><div class="lbl">Kondisi</div><div class="val" id="cond1">--</div></div>
+        <div class="st"><div class="lbl">Relay</div><div class="val" id="pel1State">--</div></div>
+        <div class="st"><div class="lbl">Target</div><div class="val">&le; 10&deg;C</div></div>
+      </div>
+    </div>
+
+    <div class="sensor-card">
+      <div class="sensor-head">
+        <div class="name">&#10052; Peltier 2</div>
+        <div class="badge">DS18B20 #2</div>
+      </div>
+      <div class="visual">
+        <div class="readout"><span id="tPel2">--</span><span class="u">&deg;C</span></div>
+        <div class="illus-wrap" id="pelWrap2">
+          <svg viewBox="0 0 150 190">
+            <rect x="35" y="135" width="80" height="40" rx="4" fill="#1e40af" stroke="#0f172a" stroke-width="2"/>
+            <rect x="38" y="120" width="4" height="18" fill="#334155"/>
+            <rect x="46" y="120" width="4" height="18" fill="#334155"/>
+            <rect x="54" y="120" width="4" height="18" fill="#334155"/>
+            <rect x="62" y="120" width="4" height="18" fill="#334155"/>
+            <rect x="84" y="120" width="4" height="18" fill="#334155"/>
+            <rect x="92" y="120" width="4" height="18" fill="#334155"/>
+            <rect x="100" y="120" width="4" height="18" fill="#334155"/>
+            <rect x="108" y="120" width="4" height="18" fill="#334155"/>
+            <circle class="led-dot" cx="108" cy="142" r="3" fill="#475569"/>
+            <circle cx="75" cy="75" r="42" fill="none" stroke="#0f172a" stroke-width="3"/>
+            <circle cx="75" cy="75" r="37" fill="#e2e8f0"/>
+            <g class="peltier-fan-g">
+              <path d="M 75 75 C 60 70, 48 58, 55 42 C 62 32, 78 38, 82 48 C 84 56, 80 68, 75 75 Z" fill="#0f172a"/>
+              <path d="M 75 75 C 60 70, 48 58, 55 42 C 62 32, 78 38, 82 48 C 84 56, 80 68, 75 75 Z" fill="#0f172a" transform="rotate(120 75 75)"/>
+              <path d="M 75 75 C 60 70, 48 58, 55 42 C 62 32, 78 38, 82 48 C 84 56, 80 68, 75 75 Z" fill="#0f172a" transform="rotate(240 75 75)"/>
+            </g>
+            <circle cx="75" cy="75" r="11" fill="#e2e8f0" stroke="#0f172a" stroke-width="2.5"/>
+            <circle cx="75" cy="75" r="4" fill="#0f172a"/>
+            <g class="cold-mist">
+              <circle cx="75" cy="42" r="12" fill="rgba(96,165,250,.35)"/>
+              <circle cx="60" cy="38" r="8" fill="rgba(96,165,250,.25)"/>
+              <circle cx="90" cy="38" r="8" fill="rgba(96,165,250,.25)"/>
+            </g>
+            <circle class="cold-particle c1" cx="65" cy="110" r="2.5" fill="#60a5fa"/>
+            <circle class="cold-particle c2" cx="80" cy="105" r="2" fill="#60a5fa"/>
+            <circle class="cold-particle c3" cx="72" cy="108" r="2" fill="#60a5fa"/>
+            <circle class="cold-particle c4" cx="88" cy="110" r="2.5" fill="#60a5fa"/>
+          </svg>
+        </div>
+      </div>
+      <div class="stats">
+        <div class="st"><div class="lbl">Kondisi</div><div class="val" id="cond2">--</div></div>
+        <div class="st"><div class="lbl">Relay</div><div class="val" id="pel2State">--</div></div>
+        <div class="st"><div class="lbl">Target</div><div class="val">&le; 10&deg;C</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mode-section">
+    <div class="mode-header">
+      <h2>&#9881; Mode Kontrol</h2>
+      <div class="mode-btns">
+        <button class="mode-btn active" id="btnAuto" onclick="setMode('auto')">&#129302; AUTO</button>
+        <button class="mode-btn" id="btnManual" onclick="setMode('manual')">&#9995; MANUAL</button>
+      </div>
+    </div>
+    <div class="manual-grid" id="manualGrid" style="display:none;">
+      <div class="manual-card peltier-card" id="manualCardPel1">
+        <h3>&#10052; Peltier 1 <span class="badge-off" id="badgePel1Manual">OFF</span></h3>
+        <div class="manual-visual">
+          <svg viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="42" fill="none" stroke="currentColor" stroke-width="2"/>
+            <circle cx="50" cy="50" r="37" fill="rgba(59,130,246,.15)"/>
+            <g class="spin-group">
+              <path d="M 50 50 C 40 46, 32 38, 37 27 C 42 20, 53 24, 56 31 C 57 37, 54 46, 50 50 Z" fill="currentColor"/>
+              <path d="M 50 50 C 40 46, 32 38, 37 27 C 42 20, 53 24, 56 31 C 57 37, 54 46, 50 50 Z" fill="currentColor" transform="rotate(120 50 50)"/>
+              <path d="M 50 50 C 40 46, 32 38, 37 27 C 42 20, 53 24, 56 31 C 57 37, 54 46, 50 50 Z" fill="currentColor" transform="rotate(240 50 50)"/>
+            </g>
+            <circle cx="50" cy="50" r="8" fill="#e2e8f0" stroke="currentColor" stroke-width="1.5"/>
+            <circle cx="50" cy="50" r="3" fill="currentColor"/>
+          </svg>
+        </div>
+        <label class="switch-big peltier-switch">
+          <input type="checkbox" id="mPel1" onchange="setRelay('pel1',this.checked)">
+          <span class="slider"></span>
+        </label>
+        <div class="switch-label">Kontrol Manual</div>
+      </div>
+
+      <div class="manual-card peltier-card" id="manualCardPel2">
+        <h3>&#10052; Peltier 2 <span class="badge-off" id="badgePel2Manual">OFF</span></h3>
+        <div class="manual-visual">
+          <svg viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="42" fill="none" stroke="currentColor" stroke-width="2"/>
+            <circle cx="50" cy="50" r="37" fill="rgba(59,130,246,.15)"/>
+            <g class="spin-group">
+              <path d="M 50 50 C 40 46, 32 38, 37 27 C 42 20, 53 24, 56 31 C 57 37, 54 46, 50 50 Z" fill="currentColor"/>
+              <path d="M 50 50 C 40 46, 32 38, 37 27 C 42 20, 53 24, 56 31 C 57 37, 54 46, 50 50 Z" fill="currentColor" transform="rotate(120 50 50)"/>
+              <path d="M 50 50 C 40 46, 32 38, 37 27 C 42 20, 53 24, 56 31 C 57 37, 54 46, 50 50 Z" fill="currentColor" transform="rotate(240 50 50)"/>
+            </g>
+            <circle cx="50" cy="50" r="8" fill="#e2e8f0" stroke="currentColor" stroke-width="1.5"/>
+            <circle cx="50" cy="50" r="3" fill="currentColor"/>
+          </svg>
+        </div>
+        <label class="switch-big peltier-switch">
+          <input type="checkbox" id="mPel2" onchange="setRelay('pel2',this.checked)">
+          <span class="slider"></span>
+        </label>
+        <div class="switch-label">Kontrol Manual</div>
+      </div>
+
+      <div class="manual-card fan-card" id="manualCardFan">
+        <h3>&#127744; Exhaust Fan <span class="badge-off" id="badgeFanManual">OFF</span></h3>
+        <div class="manual-visual">
+          <svg viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="42" fill="none" stroke="currentColor" stroke-width="2"/>
+            <circle cx="50" cy="50" r="37" fill="rgba(13,110,253,.15)"/>
+            <g class="spin-group">
+              <path d="M50 50 C45 40, 50 30, 50 22 C50 30, 55 40, 50 50Z" fill="currentColor"/>
+              <path d="M50 50 C60 45, 70 50, 78 50 C70 50, 60 55, 50 50Z" fill="currentColor"/>
+              <path d="M50 50 C55 60, 50 70, 50 78 C50 70, 45 60, 50 50Z" fill="currentColor"/>
+              <path d="M50 50 C40 55, 30 50, 22 50 C30 50, 40 45, 50 50Z" fill="currentColor"/>
+              <circle cx="50" cy="50" r="7" fill="#e2e8f0" stroke="currentColor" stroke-width="1.5"/>
+              <circle cx="50" cy="50" r="3" fill="currentColor"/>
+            </g>
+          </svg>
+        </div>
+        <label class="switch-big">
+          <input type="checkbox" id="mFan" onchange="setRelay('fan',this.checked)">
+          <span class="slider"></span>
+        </label>
+        <div class="switch-label">Kontrol Manual</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mode-section">
+    <h2 style="font-size:1rem;margin-bottom:14px;">&#128200; Trend Suhu Rak</h2>
+    <div class="chart-wrap"><canvas id="chart"></canvas></div>
+    <div style="font-size:.75rem;color:var(--sub);" id="chartRange">Menunggu data...</div>
+  </div>
+
+  <footer>ESP32-S3 &middot; MQTT + Vercel &copy; 2025</footer>
+</div>
+
+<script>
+// ==================== KONFIGURASI MQTT ====================
+const MQTT_BROKER_WS = 'wss://broker.hivemq.com:8884/mqtt';
+const TOPIC_DATA     = 'rak/server/rakserver/data';
+const TOPIC_STATUS   = 'rak/server/rakserver/status';
+const TOPIC_CMD      = 'rak/server/rakserver/command';
+const TOPIC_LWT      = 'rak/server/rakserver/online';
+
+// ==================== STATE ====================
+var client = null;
+var history_ = [];
+var MAX_HIST = 100;
+var lastDataTime = 0;
+
+// ==================== MQTT CONNECT ====================
+function connectMQTT(){
+  setMqttStatus('Menghubungkan...', false);
+  client = mqtt.connect(MQTT_BROKER_WS, {
+    clientId: 'web_' + Math.random().toString(16).substr(2, 8),
+    clean: true,
+    reconnectPeriod: 3000,
+    connectTimeout: 10000
+  });
+
+  client.on('connect', () => {
+    console.log('MQTT Connected');
+    setMqttStatus('Terhubung', true);
+    client.subscribe([TOPIC_DATA, TOPIC_STATUS, TOPIC_LWT]);
+  });
+
+  client.on('reconnect', () => setMqttStatus('Reconnect...', false));
+  client.on('close', () => setMqttStatus('Terputus', false));
+  client.on('error', (e) => { console.error(e); setMqttStatus('Error', false); });
+
+  client.on('message', (topic, message) => {
+    try {
+      var payload = JSON.parse(message.toString());
+      if (topic === TOPIC_DATA) handleDataMessage(payload);
+      else if (topic === TOPIC_STATUS) handleStatusMessage(payload);
+    } catch(e){
+      if (topic === TOPIC_LWT) {
+        updateDeviceStatus();
+      }
+    }
+  });
+}
+
+function setMqttStatus(text, ok){
+  document.getElementById('mqttStatus').textContent = text;
+  var dot = document.getElementById('mqttDot');
+  dot.className = 'dot ' + (ok ? 'on' : 'off');
+}
+
+function updateDeviceStatus(){
+  var el = document.getElementById('deviceStatus');
+  var recent = (Date.now() - lastDataTime) < 30000;
+  if (recent){
+    el.textContent = 'Online';
+    el.style.color = 'var(--ok)';
+  } else {
+    el.textContent = 'Offline';
+    el.style.color = 'var(--hot)';
+  }
+}
+
+// ==================== HANDLE DATA ====================
+function handleDataMessage(d){
+  lastDataTime = Date.now();
+  updateDeviceStatus();
+
+  document.getElementById('tRak').textContent = d.tRak.toFixed(1);
+  document.getElementById('rh').textContent = d.rh.toFixed(0);
+  document.getElementById('tPel1').textContent = d.tPel1.toFixed(1);
+  document.getElementById('tPel2').textContent = d.tPel2.toFixed(1);
+
+  var badge = document.getElementById('badgeRak');
+  var statusTxt = document.getElementById('statusRakTxt');
+  if (d.tRak < 18){
+    badge.textContent='DINGIN'; badge.style.background='rgba(59,130,246,.15)'; badge.style.color='#3b82f6';
+    statusTxt.textContent='Dingin';
+  } else if (d.tRak > 28){
+    badge.textContent='PANAS'; badge.style.background='rgba(239,68,68,.15)'; badge.style.color='#ef4444';
+    statusTxt.textContent='Panas';
+  } else {
+    badge.textContent='NORMAL'; badge.style.background='rgba(16,185,129,.15)'; badge.style.color='#10b981';
+    statusTxt.textContent='Stabil';
+  }
+
+  updateRackAnim(d.tRak);
+  document.getElementById('cond1').textContent = d.tPel1 < 5 ? 'Sangat Dingin' : (d.tPel1 > 25 ? 'Hangat' : 'Normal');
+  document.getElementById('cond2').textContent = d.tPel2 < 5 ? 'Sangat Dingin' : (d.tPel2 > 25 ? 'Hangat' : 'Normal');
+  document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('id-ID');
+
+  history_.push(d.tRak);
+  if (history_.length > MAX_HIST) history_.shift();
+  drawChart();
+}
+
+function handleStatusMessage(d){
+  document.getElementById('rssi').textContent = d.rssi + ' dBm';
+  document.getElementById('heap').textContent = (d.heap/1024).toFixed(1) + ' KB';
+  document.getElementById('ip').textContent = d.ip;
+  document.getElementById('serverTime').textContent = d.serverTime || '--';
+
+  var grid = document.getElementById('manualGrid');
+  var btnAuto = document.getElementById('btnAuto');
+  var btnMan = document.getElementById('btnManual');
+  if (d.manual){
+    btnMan.classList.add('active','manual-active');
+    btnAuto.classList.remove('active');
+    grid.style.display = 'grid';
+  } else {
+    btnAuto.classList.add('active');
+    btnMan.classList.remove('active','manual-active');
+    grid.style.display = 'none';
+  }
+
+  document.getElementById('pel1State').textContent = d.manualPel1 ? 'ON' : 'OFF';
+  document.getElementById('pel2State').textContent = d.manualPel2 ? 'ON' : 'OFF';
+  document.getElementById('mPel1').checked = d.manualPel1;
+  document.getElementById('mPel2').checked = d.manualPel2;
+  document.getElementById('mFan').checked = d.manualFan;
+
+  var b1 = document.getElementById('badgePel1Manual');
+  var b2 = document.getElementById('badgePel2Manual');
+  var bf = document.getElementById('badgeFanManual');
+  b1.textContent = d.manualPel1 ? 'ON' : 'OFF';
+  b1.className = d.manualPel1 ? 'badge-on' : 'badge-off';
+  b2.textContent = d.manualPel2 ? 'ON' : 'OFF';
+  b2.className = d.manualPel2 ? 'badge-on' : 'badge-off';
+  bf.textContent = d.manualFan ? 'ON' : 'OFF';
+  bf.className = d.manualFan ? 'badge-on' : 'badge-off';
+
+  var c1 = document.getElementById('manualCardPel1');
+  var c2 = document.getElementById('manualCardPel2');
+  var cf = document.getElementById('manualCardFan');
+  c1.classList.toggle('on', d.manualPel1);
+  c1.classList.toggle('peltier-on', d.manualPel1);
+  c2.classList.toggle('on', d.manualPel2);
+  c2.classList.toggle('peltier-on', d.manualPel2);
+  cf.classList.toggle('on', d.manualFan);
+
+  updatePeltierAnim(1, d.manualPel1);
+  updatePeltierAnim(2, d.manualPel2);
+}
+
+// ==================== KIRIM PERINTAH ====================
+function setMode(m){
+  if (!client || !client.connected) return alert('MQTT belum terhubung');
+  client.publish(TOPIC_CMD, JSON.stringify({mode: m}));
+}
+
+function setRelay(name, on){
+  if (!client || !client.connected) return alert('MQTT belum terhubung');
+  client.publish(TOPIC_CMD, JSON.stringify({relay: name, state: on}));
+}
+
+// ==================== UI ANIMASI ====================
+function updateRackAnim(temp){
+  var wrap = document.getElementById('rackWrap');
+  if (!wrap) return;
+  var leds = wrap.querySelectorAll('.rack-led');
+  for (var i=0;i<leds.length;i++){
+    if (temp > 28){
+      leds[i].setAttribute('fill','#ef4444');
+      leds[i].classList.add('fast');
+    } else if (temp < 18){
+      leds[i].setAttribute('fill','#3b82f6');
+      leds[i].classList.remove('fast');
+    } else {
+      leds[i].setAttribute('fill','#22c55e');
+      leds[i].classList.remove('fast');
+    }
+  }
+}
+
+function updatePeltierAnim(num, on){
+  var wrap = document.getElementById('pelWrap' + num);
+  if (!wrap) return;
+  wrap.classList.toggle('active', on);
+  wrap.classList.toggle('cold-active', on);
+}
+
+// ==================== CHART ====================
+function drawChart(){
+  var c = document.getElementById('chart');
+  var dpr = window.devicePixelRatio || 1;
+  var rect = c.getBoundingClientRect();
+  c.width = rect.width * dpr;
+  c.height = rect.height * dpr;
+  var ctx = c.getContext('2d');
+  ctx.scale(dpr, dpr);
+  var W = rect.width, H = rect.height;
+  var pad = 34;
+  ctx.clearRect(0,0,W,H);
+  if (history_.length < 2){
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = '13px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('Menunggu data...', W/2, H/2);
+    return;
+  }
+  ctx.strokeStyle = '#e5eaf1';
+  ctx.fillStyle = '#64748b';
+  ctx.lineWidth = 1;
+  ctx.font = '10px sans-serif';
+  var yMin = 10, yMax = 40;
+  for (var i=0;i<=4;i++){
+    var y = pad + (H - 2*pad) * (i/4);
+    ctx.beginPath();
+    ctx.moveTo(pad, y);
+    ctx.lineTo(W-pad, y);
+    ctx.stroke();
+    var val = yMax - (yMax-yMin)*(i/4);
+    ctx.textAlign='right';
+    ctx.fillText(val.toFixed(0)+'C', pad-6, y+3);
+  }
+  var xs = [], ys = [];
+  for (var j=0;j<history_.length;j++){
+    xs.push(pad + (W-2*pad) * (j/(history_.length-1)));
+    ys.push(pad + (H-2*pad) * (1 - (history_[j]-yMin)/(yMax-yMin)));
+  }
+  var grad = ctx.createLinearGradient(0,pad,0,H-pad);
+  grad.addColorStop(0,'rgba(245,158,11,.25)');
+  grad.addColorStop(1,'rgba(245,158,11,0)');
+  ctx.beginPath();
+  ctx.moveTo(xs[0], H-pad);
+  for(var k=0;k<xs.length;k++) ctx.lineTo(xs[k], ys[k]);
+  ctx.lineTo(xs[xs.length-1], H-pad);
+  ctx.closePath();
+  ctx.fillStyle = grad;
+  ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(xs[0], ys[0]);
+  for(var m=1;m<xs.length;m++) ctx.lineTo(xs[m], ys[m]);
+  ctx.strokeStyle = '#f59e0b';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+  var minV = Math.min.apply(null, history_);
+  var maxV = Math.max.apply(null, history_);
+  document.getElementById('chartRange').textContent =
+    history_.length + ' titik - Rentang ' + minV.toFixed(1) + 'C - ' + maxV.toFixed(1) + 'C';
+}
+
+// ==================== THEME ====================
+function applyTheme(n){
+  document.body.classList.toggle('night',n);
+  document.getElementById('themeBtn').textContent = n?'Siang':'Malam';
+  localStorage.setItem('night', n?'1':'0');
+}
+function toggleTheme(){applyTheme(!document.body.classList.contains('night'));}
+(function(){var s=localStorage.getItem('night');applyTheme(s==='1');})();
+
+// ==================== INIT ====================
+connectMQTT();
+window.addEventListener('resize', drawChart);
+setInterval(updateDeviceStatus, 5000);
+</script>
+</body>
+</html>
