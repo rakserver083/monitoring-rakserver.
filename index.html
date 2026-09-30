@@ -36,31 +36,25 @@ body{background:var(--bg);color:var(--text);padding:18px;min-height:100vh;transi
 .banner{background:linear-gradient(135deg,rgba(13,110,253,.08),rgba(20,184,166,.08));border:1px solid var(--border);border-left:4px solid var(--accent);border-radius:12px;padding:14px 18px;font-size:.85rem;margin-bottom:14px;}
 .banner b{color:var(--accent);}
 
-/* ============ SETPOINT CARD ============ */
-.setpoint-card{background:linear-gradient(135deg,#fef3c7,#fed7aa);border:2px solid #f59e0b;border-radius:16px;padding:18px 20px;box-shadow:var(--shadow);margin-bottom:18px;}
-body.night .setpoint-card{background:linear-gradient(135deg,#422006,#78350f);border-color:#f59e0b;}
-.setpoint-card h2{font-size:1rem;font-weight:700;margin-bottom:12px;color:#78350f;display:flex;align-items:center;gap:8px;}
-body.night .setpoint-card h2{color:#fbbf24;}
+/* ============ SETPOINT CARD (SESUAI TEMA) ============ */
+.setpoint-card{background:var(--card);border:1px solid var(--border);border-left:4px solid var(--accent);border-radius:16px;padding:18px 20px;box-shadow:var(--shadow);margin-bottom:18px;}
+.setpoint-card h2{font-size:1rem;font-weight:700;margin-bottom:12px;color:var(--text);display:flex;align-items:center;gap:8px;}
 .sp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:14px;}
-.sp-item{background:rgba(255,255,255,.6);border:2px solid #f59e0b;border-radius:12px;padding:12px;}
-body.night .sp-item{background:rgba(0,0,0,.3);}
-.sp-item label{display:block;font-size:.72rem;font-weight:700;color:#78350f;text-transform:uppercase;margin-bottom:6px;}
-body.night .sp-item label{color:#fbbf24;}
-.sp-item input{width:100%;padding:10px;border:2px solid #f59e0b;border-radius:8px;font-size:1.1rem;font-weight:800;text-align:center;color:#78350f;background:#fff;}
-body.night .sp-item input{background:#1e293b;color:#fbbf24;border-color:#f59e0b;}
-.sp-item input:focus{outline:0;border-color:#dc2626;box-shadow:0 0 0 3px rgba(245,158,11,.3);}
-.sp-item .hint{font-size:.65rem;color:#92400e;margin-top:4px;}
-body.night .sp-item .hint{color:#fbbf24;}
+.sp-item{background:var(--chip);border:1px solid var(--border);border-radius:12px;padding:12px;}
+.sp-item label{display:block;font-size:.72rem;font-weight:700;color:var(--sub);text-transform:uppercase;margin-bottom:6px;letter-spacing:.3px;}
+.sp-item input{width:100%;padding:10px;border:2px solid var(--border);border-radius:8px;font-size:1.1rem;font-weight:800;text-align:center;color:var(--text);background:var(--card);transition:border-color .2s,box-shadow .2s;}
+.sp-item input:focus{outline:0;border-color:var(--accent);box-shadow:0 0 0 3px rgba(13,110,253,.15);}
+.sp-item .hint{font-size:.65rem;color:var(--sub);margin-top:4px;line-height:1.4;}
 .sp-actions{display:flex;gap:8px;flex-wrap:wrap;}
-.sp-actions button{padding:10px 20px;border-radius:10px;border:0;font-weight:700;font-size:.85rem;cursor:pointer;}
-.sp-actions button.save{background:linear-gradient(135deg,#10b981,#059669);color:#fff;box-shadow:0 4px 10px rgba(16,185,129,.3);}
-.sp-actions button.reset{background:#fff;color:#78350f;border:2px solid #f59e0b;}
-body.night .sp-actions button.reset{background:#1e293b;color:#fbbf24;}
-.sp-status{font-size:.75rem;margin-top:10px;padding:8px 12px;border-radius:8px;background:rgba(255,255,255,.5);color:#78350f;display:none;}
-body.night .sp-status{background:rgba(0,0,0,.3);color:#fbbf24;}
+.sp-actions button{padding:10px 20px;border-radius:10px;border:0;font-weight:700;font-size:.85rem;cursor:pointer;transition:opacity .2s,transform .1s;}
+.sp-actions button:hover{opacity:.9;}
+.sp-actions button:active{transform:scale(.98);}
+.sp-actions button.save{background:var(--accent);color:#fff;box-shadow:0 4px 10px rgba(13,110,253,.3);}
+.sp-actions button.reset{background:var(--chip);color:var(--text);border:1px solid var(--border);}
+.sp-status{font-size:.75rem;margin-top:10px;padding:8px 12px;border-radius:8px;background:var(--chip);color:var(--sub);display:none;}
 .sp-status.show{display:block;}
-.sp-status.ok{background:rgba(16,185,129,.15);color:#065f46;border-left:4px solid #10b981;}
-.sp-status.err{background:rgba(239,68,68,.15);color:#991b1b;border-left:4px solid #ef4444;}
+.sp-status.ok{background:rgba(16,185,129,.15);color:var(--ok);border-left:4px solid var(--ok);}
+.sp-status.err{background:rgba(239,68,68,.15);color:var(--hot);border-left:4px solid var(--hot);}
 
 .sensor-grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));margin-bottom:18px;}
 .sensor-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;box-shadow:var(--shadow);}
@@ -166,7 +160,7 @@ footer{text-align:center;color:var(--sub);font-size:.75rem;padding:24px 0 8px;}
   </div>
 
   <div class="banner">
-    <b>ℹ️ Info:</b> Data real-time via MQTT, disimpan ke <b>Firebase</b> tiap 10 detik. Setting setpoint suhu di panel kuning di bawah.
+    <b>ℹ️ Info:</b> Data real-time via MQTT, disimpan ke <b>Firebase</b> tiap 10 detik. Setting setpoint suhu di panel di bawah.
   </div>
 
   <div class="statusbar">
@@ -197,7 +191,7 @@ footer{text-align:center;color:var(--sub);font-size:.75rem;padding:24px 0 8px;}
       </div>
       <div class="sp-item">
         <label>❄️ Histeresis</label>
-        <input type="number" step="0.5" id="spOff" value="26.0">
+        <input type="number" step="0.5" id="spOff" value="22.5">
         <div class="hint">Peltier OFF jika suhu ≤ nilai ini</div>
       </div>
     </div>
@@ -462,7 +456,7 @@ footer{text-align:center;color:var(--sub);font-size:.75rem;padding:24px 0 8px;}
       <li>Setpoint suhu editable dari web (tersimpan di EEPROM)</li>
       <li>Kontrol otomatis Peltier dengan histeresis</li>
       <li>Proteksi dingin (Peltier OFF jika suhu terlalu rendah)</li>
-      <li>Siklus exhaust fan otomatis (10s ON / 5m)</li>
+      <li>Siklus exhaust fan otomatis (1 menit ON / 5 menit)</li>
       <li>Mode Manual via MQTT</li>
       <li>WiFi Manager (AP mode jika WiFi gagal)</li>
       <li>Log permanen Firebase + export Excel per kolom</li>
@@ -751,7 +745,6 @@ function updateSpDisplay(){
   var el = document.getElementById('spDisplay');
   if (lastStatus && lastStatus.spMin !== undefined) {
     el.textContent = lastStatus.spMin.toFixed(0) + '-' + lastStatus.spMax.toFixed(0) + '°C';
-    // Update form juga (kalau belum diedit user)
     if (document.activeElement.id !== 'spMin') document.getElementById('spMin').value = lastStatus.spMin;
     if (document.activeElement.id !== 'spMax') document.getElementById('spMax').value = lastStatus.spMax;
     if (document.activeElement.id !== 'spOff') document.getElementById('spOff').value = lastStatus.spOff;
