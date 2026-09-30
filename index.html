@@ -35,6 +35,33 @@ body{background:var(--bg);color:var(--text);padding:18px;min-height:100vh;transi
 @keyframes pulse{0%,100%{box-shadow:0 0 0 3px rgba(16,185,129,.2);}50%{box-shadow:0 0 0 6px rgba(16,185,129,0);}}
 .banner{background:linear-gradient(135deg,rgba(13,110,253,.08),rgba(20,184,166,.08));border:1px solid var(--border);border-left:4px solid var(--accent);border-radius:12px;padding:14px 18px;font-size:.85rem;margin-bottom:14px;}
 .banner b{color:var(--accent);}
+
+/* ============ SETPOINT CARD ============ */
+.setpoint-card{background:linear-gradient(135deg,#fef3c7,#fed7aa);border:2px solid #f59e0b;border-radius:16px;padding:18px 20px;box-shadow:var(--shadow);margin-bottom:18px;}
+body.night .setpoint-card{background:linear-gradient(135deg,#422006,#78350f);border-color:#f59e0b;}
+.setpoint-card h2{font-size:1rem;font-weight:700;margin-bottom:12px;color:#78350f;display:flex;align-items:center;gap:8px;}
+body.night .setpoint-card h2{color:#fbbf24;}
+.sp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:14px;}
+.sp-item{background:rgba(255,255,255,.6);border:2px solid #f59e0b;border-radius:12px;padding:12px;}
+body.night .sp-item{background:rgba(0,0,0,.3);}
+.sp-item label{display:block;font-size:.72rem;font-weight:700;color:#78350f;text-transform:uppercase;margin-bottom:6px;}
+body.night .sp-item label{color:#fbbf24;}
+.sp-item input{width:100%;padding:10px;border:2px solid #f59e0b;border-radius:8px;font-size:1.1rem;font-weight:800;text-align:center;color:#78350f;background:#fff;}
+body.night .sp-item input{background:#1e293b;color:#fbbf24;border-color:#f59e0b;}
+.sp-item input:focus{outline:0;border-color:#dc2626;box-shadow:0 0 0 3px rgba(245,158,11,.3);}
+.sp-item .hint{font-size:.65rem;color:#92400e;margin-top:4px;}
+body.night .sp-item .hint{color:#fbbf24;}
+.sp-actions{display:flex;gap:8px;flex-wrap:wrap;}
+.sp-actions button{padding:10px 20px;border-radius:10px;border:0;font-weight:700;font-size:.85rem;cursor:pointer;}
+.sp-actions button.save{background:linear-gradient(135deg,#10b981,#059669);color:#fff;box-shadow:0 4px 10px rgba(16,185,129,.3);}
+.sp-actions button.reset{background:#fff;color:#78350f;border:2px solid #f59e0b;}
+body.night .sp-actions button.reset{background:#1e293b;color:#fbbf24;}
+.sp-status{font-size:.75rem;margin-top:10px;padding:8px 12px;border-radius:8px;background:rgba(255,255,255,.5);color:#78350f;display:none;}
+body.night .sp-status{background:rgba(0,0,0,.3);color:#fbbf24;}
+.sp-status.show{display:block;}
+.sp-status.ok{background:rgba(16,185,129,.15);color:#065f46;border-left:4px solid #10b981;}
+.sp-status.err{background:rgba(239,68,68,.15);color:#991b1b;border-left:4px solid #ef4444;}
+
 .sensor-grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));margin-bottom:18px;}
 .sensor-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;box-shadow:var(--shadow);}
 .sensor-card.primary{border:2px solid var(--accent);}
@@ -104,7 +131,6 @@ footer{text-align:center;color:var(--sub);font-size:.75rem;padding:24px 0 8px;}
 .btn-sm{padding:8px 14px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:.8rem;cursor:pointer;font-weight:600;}
 .btn-sm.green{background:var(--ok);color:#fff;border-color:var(--ok);}
 .btn-sm.blue{background:var(--accent);color:#fff;border-color:var(--accent);}
-.btn-sm.purple{background:#8b5cf6;color:#fff;border-color:#8b5cf6;}
 .btn-sm.red{background:var(--hot);color:#fff;border-color:var(--hot);}
 .about-section{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;box-shadow:var(--shadow);margin-bottom:18px;}
 .about-section h2{font-size:1rem;margin-bottom:12px;}
@@ -140,7 +166,7 @@ footer{text-align:center;color:var(--sub);font-size:.75rem;padding:24px 0 8px;}
   </div>
 
   <div class="banner">
-    <b>ℹ️ Info:</b> Data real-time via MQTT, disimpan permanen ke <b>Firebase Realtime Database</b> setiap <b>10 detik</b>. Semua tombol download menghasilkan file <b>Excel per kolom</b>.
+    <b>ℹ️ Info:</b> Data real-time via MQTT, disimpan ke <b>Firebase</b> tiap 10 detik. Setting setpoint suhu di panel kuning di bawah.
   </div>
 
   <div class="statusbar">
@@ -153,6 +179,33 @@ footer{text-align:center;color:var(--sub);font-size:.75rem;padding:24px 0 8px;}
     <div class="item">IP: <b id="ip">--</b></div>
     <div class="item">Heap: <b id="heap">--</b></div>
     <div class="item">Total log: <b id="totalLog">--</b></div>
+  </div>
+
+  <!-- ============ SETPOINT PANEL ============ -->
+  <div class="setpoint-card">
+    <h2>⚙️ Pengaturan Setpoint Suhu</h2>
+    <div class="sp-grid">
+      <div class="sp-item">
+        <label>🌡️ Batas Bawah</label>
+        <input type="number" step="0.5" id="spMin" value="18.0">
+        <div class="hint">Proteksi dingin (Peltier OFF jika suhu di bawah ini)</div>
+      </div>
+      <div class="sp-item">
+        <label>🔥 Batas Atas</label>
+        <input type="number" step="0.5" id="spMax" value="28.0">
+        <div class="hint">Peltier ON jika suhu ≥ nilai ini</div>
+      </div>
+      <div class="sp-item">
+        <label>❄️ Histeresis</label>
+        <input type="number" step="0.5" id="spOff" value="26.0">
+        <div class="hint">Peltier OFF jika suhu ≤ nilai ini</div>
+      </div>
+    </div>
+    <div class="sp-actions">
+      <button class="save" onclick="saveSetpoint()">💾 Simpan Setpoint</button>
+      <button class="reset" onclick="loadSetpoint()">🔄 Muat Ulang</button>
+    </div>
+    <div class="sp-status" id="spStatus"></div>
   </div>
 
   <div class="sensor-grid">
@@ -190,7 +243,7 @@ footer{text-align:center;color:var(--sub);font-size:.75rem;padding:24px 0 8px;}
       </div>
       <div class="stats">
         <div class="st"><div class="lbl">Kelembapan</div><div class="val"><span id="rh">--</span>%</div></div>
-        <div class="st"><div class="lbl">Setpoint</div><div class="val">18-28°C</div></div>
+        <div class="st"><div class="lbl">Setpoint</div><div class="val" id="spDisplay">--</div></div>
         <div class="st"><div class="lbl">Status</div><div class="val" id="statusRakTxt">--</div></div>
       </div>
     </div>
@@ -406,13 +459,14 @@ footer{text-align:center;color:var(--sub);font-size:.75rem;padding:24px 0 8px;}
     <p><b>Fitur:</b></p>
     <ul>
       <li>Monitoring real-time DHT22 + 2× DS18B20</li>
-      <li>Kontrol otomatis Peltier (setpoint 18-28°C) + proteksi dingin</li>
+      <li>Setpoint suhu editable dari web (tersimpan di EEPROM)</li>
+      <li>Kontrol otomatis Peltier dengan histeresis</li>
+      <li>Proteksi dingin (Peltier OFF jika suhu terlalu rendah)</li>
       <li>Siklus exhaust fan otomatis (10s ON / 5m)</li>
       <li>Mode Manual via MQTT</li>
       <li>WiFi Manager (AP mode jika WiFi gagal)</li>
       <li>Log permanen Firebase + export Excel per kolom</li>
       <li>Grafik trend interaktif</li>
-      <li>Mode malam/siang</li>
     </ul>
     <p><b>Hardware:</b> ESP32-S3 · DHT22 · 2× DS18B20 · 3× Relay · LCD I2C · 2× Peltier · Fan</p>
     <p><b>MQTT:</b> <code>broker.hivemq.com</code> · Topic: <code>rak/server/rakserver/*</code></p>
@@ -470,7 +524,6 @@ async function saveToFirebase(data){
     const rh    = Number(data.rh)    || 0;
     const tPel1 = Number(data.tPel1) || 0;
     const tPel2 = Number(data.tPel2) || 0;
-
     if (tRak === 0 && rh === 0 && tPel1 === 0 && tPel2 === 0) return;
 
     const now = new Date();
@@ -575,15 +628,12 @@ function fmtTime(iso){
     + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
 }
 
-// ==================== EXPORT HELPER ====================
 function exportItemsToExcel(items, filename){
   if (!items || items.length === 0) return alert('Tidak ada data');
-
   var wsData = [
     ['Waktu', 'Suhu Rak (°C)', 'Kelembapan (%)', 'Peltier 1 (°C)', 'Peltier 2 (°C)',
      'Peltier (Relay)', 'Fan (Relay)', 'Mode']
   ];
-
   items.forEach(x => {
     wsData.push([
       fmtTime(x.t),
@@ -596,14 +646,11 @@ function exportItemsToExcel(items, filename){
       x.mode ? 'MANUAL' : 'AUTO'
     ]);
   });
-
   var ws = XLSX.utils.aoa_to_sheet(wsData);
-
   ws['!cols'] = [
     { wch: 22 }, { wch: 14 }, { wch: 16 }, { wch: 14 },
     { wch: 14 }, { wch: 15 }, { wch: 12 }, { wch: 10 }
   ];
-
   var range = XLSX.utils.decode_range(ws['!ref']);
   for (var R = 1; R <= range.e.r; R++) {
     for (var C = 1; C <= 4; C++) {
@@ -615,13 +662,11 @@ function exportItemsToExcel(items, filename){
       }
     }
   }
-
   var wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'Log Rak Server');
   XLSX.writeFile(wb, filename + '.xlsx');
 }
 
-// ==================== TOMBOL DOWNLOAD ====================
 function downloadDate(dateKey){
   var g = fbDates.find(x => x.date === dateKey);
   if (!g || g.items.length === 0) return alert('Tidak ada data');
@@ -657,12 +702,59 @@ async function exportExcel(){
     arr.sort((a,b) => a.ts - b.ts);
     arr = arr.filter(x => !(Number(x.tRak) === 0 && Number(x.rh) === 0 && Number(x.tPel1) === 0 && Number(x.tPel2) === 0));
     if (arr.length === 0) return alert('Semua data kosong (0)');
-
     exportItemsToExcel(arr, 'Log_RakServer_' + new Date().toISOString().slice(0,10));
     alert('✅ Export berhasil: ' + arr.length + ' baris');
   } catch(e){
     console.error(e);
     alert('Gagal export: ' + e.message);
+  }
+}
+
+// ==================== SETPOINT ====================
+function showSpStatus(msg, ok){
+  var el = document.getElementById('spStatus');
+  el.textContent = msg;
+  el.className = 'sp-status show ' + (ok ? 'ok' : 'err');
+  setTimeout(() => { el.className = 'sp-status'; }, 4000);
+}
+
+function saveSetpoint(){
+  if (!client || !client.connected) return alert('MQTT belum terhubung');
+  var mn = parseFloat(document.getElementById('spMin').value);
+  var mx = parseFloat(document.getElementById('spMax').value);
+  var of = parseFloat(document.getElementById('spOff').value);
+
+  if (isNaN(mn) || isNaN(mx) || isNaN(of)) return showSpStatus('❌ Isi semua angka!', false);
+  if (mn >= mx) return showSpStatus('❌ Batas bawah harus < batas atas', false);
+  if (of >= mx) return showSpStatus('❌ Histeresis harus < batas atas', false);
+  if (of <= mn) return showSpStatus('❌ Histeresis harus > batas bawah', false);
+
+  client.publish(TOPIC_CMD, JSON.stringify({
+    setpoint: true, min: mn, max: mx, off: of
+  }));
+  showSpStatus('✅ Setpoint terkirim: ' + mn + ' / ' + mx + ' / ' + of + '°C', true);
+}
+
+function loadSetpoint(){
+  if (lastStatus) {
+    if (lastStatus.spMin !== undefined) document.getElementById('spMin').value = lastStatus.spMin;
+    if (lastStatus.spMax !== undefined) document.getElementById('spMax').value = lastStatus.spMax;
+    if (lastStatus.spOff !== undefined) document.getElementById('spOff').value = lastStatus.spOff;
+    updateSpDisplay();
+    showSpStatus('🔄 Setpoint dimuat dari ESP32', true);
+  } else {
+    showSpStatus('⚠️ Belum ada data dari ESP32', false);
+  }
+}
+
+function updateSpDisplay(){
+  var el = document.getElementById('spDisplay');
+  if (lastStatus && lastStatus.spMin !== undefined) {
+    el.textContent = lastStatus.spMin.toFixed(0) + '-' + lastStatus.spMax.toFixed(0) + '°C';
+    // Update form juga (kalau belum diedit user)
+    if (document.activeElement.id !== 'spMin') document.getElementById('spMin').value = lastStatus.spMin;
+    if (document.activeElement.id !== 'spMax') document.getElementById('spMax').value = lastStatus.spMax;
+    if (document.activeElement.id !== 'spOff') document.getElementById('spOff').value = lastStatus.spOff;
   }
 }
 
@@ -712,8 +804,11 @@ function handleDataMessage(d){
 
   var badge = document.getElementById('badgeRak');
   var statusTxt = document.getElementById('statusRakTxt');
-  if (d.tRak < 18){ badge.textContent='DINGIN'; badge.style.background='rgba(59,130,246,.15)'; badge.style.color='#3b82f6'; statusTxt.textContent='Dingin'; }
-  else if (d.tRak > 28){ badge.textContent='PANAS'; badge.style.background='rgba(239,68,68,.15)'; badge.style.color='#ef4444'; statusTxt.textContent='Panas'; }
+  var spMin = lastStatus ? Number(lastStatus.spMin) : 18;
+  var spMax = lastStatus ? Number(lastStatus.spMax) : 28;
+
+  if (d.tRak < spMin){ badge.textContent='DINGIN'; badge.style.background='rgba(59,130,246,.15)'; badge.style.color='#3b82f6'; statusTxt.textContent='Dingin'; }
+  else if (d.tRak > spMax){ badge.textContent='PANAS'; badge.style.background='rgba(239,68,68,.15)'; badge.style.color='#ef4444'; statusTxt.textContent='Panas'; }
   else { badge.textContent='NORMAL'; badge.style.background='rgba(16,185,129,.15)'; badge.style.color='#10b981'; statusTxt.textContent='Stabil'; }
 
   updateRackAnim(d.tRak);
@@ -738,6 +833,8 @@ function handleStatusMessage(d){
   document.getElementById('heap').textContent = (d.heap/1024).toFixed(1) + ' KB';
   document.getElementById('ip').textContent = d.ip;
   document.getElementById('serverTime').textContent = d.serverTime || '--';
+
+  updateSpDisplay();
 
   var grid = document.getElementById('manualGrid');
   var btnAuto = document.getElementById('btnAuto');
@@ -895,6 +992,8 @@ window.downloadDate = downloadDate;
 window.deleteDate = deleteDate;
 window.clearAllLogs = clearAllLogs;
 window.loadFirebaseDates = loadFirebaseDates;
+window.saveSetpoint = saveSetpoint;
+window.loadSetpoint = loadSetpoint;
 </script>
 </body>
 </html>
