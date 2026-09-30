@@ -13,13 +13,10 @@ body.night{--bg:#0b1220;--card:#131c2e;--text:#f1f5f9;--sub:#94a3b8;--accent:#3b
 body{background:var(--bg);color:var(--text);padding:18px;min-height:100vh;transition:background .3s,color .3s;}
 .wrap{max-width:1280px;margin:0 auto;}
 .header{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px 22px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;box-shadow:var(--shadow);margin-bottom:14px;}
-
-/* LOGO EMOJI TERMOMETER */
 .logo{width:60px;height:60px;border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;transition:all .3s;font-size:1.9rem;line-height:1;}
 .logo.day{background:linear-gradient(135deg,#fb923c,#f59e0b);box-shadow:0 4px 12px rgba(245,158,11,.35);}
 .logo.night{background:linear-gradient(135deg,#3b82f6,#60a5fa);box-shadow:0 4px 12px rgba(59,130,246,.35);}
 .logo::after{content:'🌡️';display:inline-block;filter:drop-shadow(0 2px 4px rgba(0,0,0,.2));}
-
 .title-block{flex:1;min-width:200px;}
 .title-block h1{font-size:1.3rem;font-weight:800;letter-spacing:-.3px;}
 .title-block .sub{font-size:.8rem;color:var(--sub);margin-top:2px;}
