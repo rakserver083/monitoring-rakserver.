@@ -140,7 +140,7 @@ footer{text-align:center;color:var(--sub);font-size:.75rem;padding:24px 0 8px;}
   </div>
 
   <div class="banner">
-    <b>ℹ️ Info:</b> Data real-time via MQTT, disimpan permanen ke <b>Firebase Realtime Database</b>. Kontrol relay hanya aktif di mode <b>MANUAL</b>. WiFi Manager: buka <code>http://&lt;IP_ESP32&gt;</code> di browser.
+    <b>ℹ️ Info:</b> Data real-time via MQTT, disimpan permanen ke <b>Firebase Realtime Database</b> setiap <b>10 detik</b>. Semua tombol download menghasilkan file <b>Excel per kolom</b>.
   </div>
 
   <div class="statusbar">
@@ -387,7 +387,6 @@ footer{text-align:center;color:var(--sub);font-size:.75rem;padding:24px 0 8px;}
     <div class="log-actions">
       <button class="btn-sm green" onclick="downloadToday()">⬇️ Download Hari Ini</button>
       <button class="btn-sm blue" onclick="downloadAll()">⬇️ Download Semua</button>
-      <button class="btn-sm purple" onclick="exportExcel()">📊 Export Excel</button>
       <button class="btn-sm" onclick="loadFirebaseDates()">🔄 Muat Ulang</button>
       <button class="btn-sm red" onclick="clearAllLogs()">🗑️ Hapus Semua</button>
     </div>
@@ -411,13 +410,12 @@ footer{text-align:center;color:var(--sub);font-size:.75rem;padding:24px 0 8px;}
       <li>Siklus exhaust fan otomatis (10s ON / 5m)</li>
       <li>Mode Manual via MQTT</li>
       <li>WiFi Manager (AP mode jika WiFi gagal)</li>
-      <li>Log permanen Firebase + export Excel/CSV</li>
+      <li>Log permanen Firebase + export Excel per kolom</li>
       <li>Grafik trend interaktif</li>
       <li>Mode malam/siang</li>
     </ul>
     <p><b>Hardware:</b> ESP32-S3 · DHT22 · 2× DS18B20 · 3× Relay · LCD I2C · 2× Peltier · Fan</p>
     <p><b>MQTT:</b> <code>broker.hivemq.com</code> · Topic: <code>rak/server/rakserver/*</code></p>
-    <p><b>Firebase:</b> <code>monitoring-rakserver</code></p>
   </div>
 
   <footer>ESP32-S3 · MQTT + Firebase · © 2025</footer>
@@ -458,7 +456,7 @@ var currentRefreshMs = 5000;
 var lastData = null;
 var lastStatus = null;
 var lastSavedTs = 0;
-var SAVE_INTERVAL = 30000;
+var SAVE_INTERVAL = 10000;
 var fbDates = [];
 
 function setFbStatus(text, ok){
@@ -473,10 +471,7 @@ async function saveToFirebase(data){
     const tPel1 = Number(data.tPel1) || 0;
     const tPel2 = Number(data.tPel2) || 0;
 
-    if (tRak === 0 && rh === 0 && tPel1 === 0 && tPel2 === 0) {
-      console.warn('[FB] Skip: semua 0');
-      return;
-    }
+    if (tRak === 0 && rh === 0 && tPel1 === 0 && tPel2 === 0) return;
 
     const now = new Date();
     const dateKey = now.toISOString().slice(0,10);
@@ -486,15 +481,9 @@ async function saveToFirebase(data){
     const manual  = lastStatus ? !!lastStatus.manual : false;
 
     const payload = {
-      t: now.toISOString(),
-      ts: Date.now(),
-      tRak: tRak,
-      rh: rh,
-      tPel1: tPel1,
-      tPel2: tPel2,
-      peltier: peltier,
-      fan: fan,
-      mode: manual
+      t: now.toISOString(), ts: Date.now(),
+      tRak: tRak, rh: rh, tPel1: tPel1, tPel2: tPel2,
+      peltier: peltier, fan: fan, mode: manual
     };
 
     await set(push(ref(db, 'rak_logs_by_date/' + dateKey)), payload);
@@ -525,9 +514,7 @@ async function loadFirebaseDates(){
       child.forEach(gc => items.push(gc.val()));
       items.sort((a,b) => a.ts - b.ts);
       items = items.filter(x => !(Number(x.tRak) === 0 && Number(x.rh) === 0 && Number(x.tPel1) === 0 && Number(x.tPel2) === 0));
-      if (items.length > 0) {
-        fbDates.push({ date: child.key, items: items });
-      }
+      if (items.length > 0) fbDates.push({ date: child.key, items: items });
     });
     fbDates.sort((a,b) => b.date.localeCompare(a.date));
     renderLogTable();
@@ -558,7 +545,7 @@ function renderLogTable(){
     html += '<td>' + start + '</td>';
     html += '<td>' + end + '</td>';
     html += '<td>' + avg.toFixed(1) + '°C</td>';
-    html += '<td><button class="btn-sm green" onclick="downloadDate(\'' + g.date + '\')">⬇️ CSV</button> ';
+    html += '<td><button class="btn-sm green" onclick="downloadDate(\'' + g.date + '\')">⬇️ Excel</button> ';
     html += '<button class="btn-sm red" onclick="deleteDate(\'' + g.date + '\')">🗑️</button></td>';
     html += '</tr>';
   });
@@ -588,39 +575,57 @@ function fmtTime(iso){
     + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
 }
 
-function buildCSV(items){
-  var delim = ';';
-  var csv = 'Waktu' + delim + 'Suhu Rak (C)' + delim + 'Kelembapan (%)' + delim
-    + 'Peltier 1 (C)' + delim + 'Peltier 2 (C)' + delim
-    + 'Peltier (Relay)' + delim + 'Fan (Relay)' + delim + 'Mode\n';
+// ==================== EXPORT HELPER ====================
+function exportItemsToExcel(items, filename){
+  if (!items || items.length === 0) return alert('Tidak ada data');
+
+  var wsData = [
+    ['Waktu', 'Suhu Rak (°C)', 'Kelembapan (%)', 'Peltier 1 (°C)', 'Peltier 2 (°C)',
+     'Peltier (Relay)', 'Fan (Relay)', 'Mode']
+  ];
 
   items.forEach(x => {
-    csv += fmtTime(x.t) + delim
-      + Number(x.tRak).toFixed(1) + delim
-      + Number(x.rh).toFixed(0) + delim
-      + Number(x.tPel1).toFixed(1) + delim
-      + Number(x.tPel2).toFixed(1) + delim
-      + (x.peltier ? 'ON' : 'OFF') + delim
-      + (x.fan ? 'ON' : 'OFF') + delim
-      + (x.mode ? 'MANUAL' : 'AUTO') + '\n';
+    wsData.push([
+      fmtTime(x.t),
+      parseFloat(Number(x.tRak).toFixed(1)),
+      parseFloat(Number(x.rh).toFixed(0)),
+      parseFloat(Number(x.tPel1).toFixed(1)),
+      parseFloat(Number(x.tPel2).toFixed(1)),
+      x.peltier ? 'ON' : 'OFF',
+      x.fan ? 'ON' : 'OFF',
+      x.mode ? 'MANUAL' : 'AUTO'
+    ]);
   });
-  return csv;
+
+  var ws = XLSX.utils.aoa_to_sheet(wsData);
+
+  ws['!cols'] = [
+    { wch: 22 }, { wch: 14 }, { wch: 16 }, { wch: 14 },
+    { wch: 14 }, { wch: 15 }, { wch: 12 }, { wch: 10 }
+  ];
+
+  var range = XLSX.utils.decode_range(ws['!ref']);
+  for (var R = 1; R <= range.e.r; R++) {
+    for (var C = 1; C <= 4; C++) {
+      var addr = XLSX.utils.encode_cell({r:R, c:C});
+      if (ws[addr]) {
+        ws[addr].t = 'n';
+        ws[addr].v = Number(ws[addr].v);
+        ws[addr].z = '0.0';
+      }
+    }
+  }
+
+  var wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Log Rak Server');
+  XLSX.writeFile(wb, filename + '.xlsx');
 }
 
-function downloadCSVFile(name, csv){
-  var blob = new Blob(['\uFEFF' + csv], {type:'text/csv;charset=utf-8;'});
-  var url = URL.createObjectURL(blob);
-  var a = document.createElement('a');
-  a.href = url; a.download = name;
-  document.body.appendChild(a); a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-}
-
+// ==================== TOMBOL DOWNLOAD ====================
 function downloadDate(dateKey){
   var g = fbDates.find(x => x.date === dateKey);
   if (!g || g.items.length === 0) return alert('Tidak ada data');
-  downloadCSVFile('log_rak_' + dateKey + '.csv', buildCSV(g.items));
+  exportItemsToExcel(g.items, 'Log_RakServer_' + dateKey);
 }
 
 function downloadToday(){
@@ -637,7 +642,7 @@ async function downloadAll(){
     arr.sort((a,b) => a.ts - b.ts);
     arr = arr.filter(x => !(Number(x.tRak) === 0 && Number(x.rh) === 0 && Number(x.tPel1) === 0 && Number(x.tPel2) === 0));
     if (arr.length === 0) return alert('Semua data kosong (0)');
-    downloadCSVFile('log_rak_semua.csv', buildCSV(arr));
+    exportItemsToExcel(arr, 'Log_RakServer_Semua');
     alert('✅ Download ' + arr.length + ' baris data');
   } catch(e){ alert('Gagal: ' + e.message); }
 }
@@ -653,45 +658,7 @@ async function exportExcel(){
     arr = arr.filter(x => !(Number(x.tRak) === 0 && Number(x.rh) === 0 && Number(x.tPel1) === 0 && Number(x.tPel2) === 0));
     if (arr.length === 0) return alert('Semua data kosong (0)');
 
-    var wsData = [
-      ['Waktu', 'Suhu Rak (C)', 'Kelembapan (%)', 'Peltier 1 (C)', 'Peltier 2 (C)',
-       'Peltier (Relay)', 'Fan (Relay)', 'Mode']
-    ];
-
-    arr.forEach(x => {
-      wsData.push([
-        fmtTime(x.t),
-        parseFloat(Number(x.tRak).toFixed(1)),
-        parseFloat(Number(x.rh).toFixed(0)),
-        parseFloat(Number(x.tPel1).toFixed(1)),
-        parseFloat(Number(x.tPel2).toFixed(1)),
-        x.peltier ? 'ON' : 'OFF',
-        x.fan ? 'ON' : 'OFF',
-        x.mode ? 'MANUAL' : 'AUTO'
-      ]);
-    });
-
-    var ws = XLSX.utils.aoa_to_sheet(wsData);
-    ws['!cols'] = [
-      { wch: 22 }, { wch: 14 }, { wch: 16 }, { wch: 14 },
-      { wch: 14 }, { wch: 15 }, { wch: 12 }, { wch: 10 }
-    ];
-
-    var range = XLSX.utils.decode_range(ws['!ref']);
-    for (var R = 1; R <= range.e.r; R++) {
-      for (var C = 1; C <= 4; C++) {
-        var addr = XLSX.utils.encode_cell({r:R, c:C});
-        if (ws[addr]) {
-          ws[addr].t = 'n';
-          ws[addr].v = Number(ws[addr].v);
-          ws[addr].z = '0.0';
-        }
-      }
-    }
-
-    var wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Log Rak Server');
-    XLSX.writeFile(wb, 'Log_RakServer_' + new Date().toISOString().slice(0,10) + '.xlsx');
+    exportItemsToExcel(arr, 'Log_RakServer_' + new Date().toISOString().slice(0,10));
     alert('✅ Export berhasil: ' + arr.length + ' baris');
   } catch(e){
     console.error(e);
@@ -699,6 +666,7 @@ async function exportExcel(){
   }
 }
 
+// ==================== MQTT ====================
 function connectMQTT(){
   setMqttStatus('Menghubungkan...', false);
   client = mqtt.connect(MQTT_BROKER_WS, {
