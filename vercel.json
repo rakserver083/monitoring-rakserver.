@@ -1,13 +1,6 @@
 {
   "version": 2,
-  "name": "rak-server-dashboard",
+  "public": true,
   "cleanUrls": true,
-  "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [
-        { "key": "X-Content-Type-Options", "value": "nosniff" }
-      ]
-    }
-  ]
+  "trailingSlash": false
 }
