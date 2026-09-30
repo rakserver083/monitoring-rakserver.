@@ -35,8 +35,6 @@ body{background:var(--bg);color:var(--text);padding:18px;min-height:100vh;transi
 @keyframes pulse{0%,100%{box-shadow:0 0 0 3px rgba(16,185,129,.2);}50%{box-shadow:0 0 0 6px rgba(16,185,129,0);}}
 .banner{background:linear-gradient(135deg,rgba(13,110,253,.08),rgba(20,184,166,.08));border:1px solid var(--border);border-left:4px solid var(--accent);border-radius:12px;padding:14px 18px;font-size:.85rem;margin-bottom:14px;}
 .banner b{color:var(--accent);}
-
-/* ============ SETPOINT CARD (SESUAI TEMA) ============ */
 .setpoint-card{background:var(--card);border:1px solid var(--border);border-left:4px solid var(--accent);border-radius:16px;padding:18px 20px;box-shadow:var(--shadow);margin-bottom:18px;}
 .setpoint-card h2{font-size:1rem;font-weight:700;margin-bottom:12px;color:var(--text);display:flex;align-items:center;gap:8px;}
 .sp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:14px;}
@@ -55,7 +53,6 @@ body{background:var(--bg);color:var(--text);padding:18px;min-height:100vh;transi
 .sp-status.show{display:block;}
 .sp-status.ok{background:rgba(16,185,129,.15);color:var(--ok);border-left:4px solid var(--ok);}
 .sp-status.err{background:rgba(239,68,68,.15);color:var(--hot);border-left:4px solid var(--hot);}
-
 .sensor-grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));margin-bottom:18px;}
 .sensor-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;box-shadow:var(--shadow);}
 .sensor-card.primary{border:2px solid var(--accent);}
@@ -160,7 +157,7 @@ footer{text-align:center;color:var(--sub);font-size:.75rem;padding:24px 0 8px;}
   </div>
 
   <div class="banner">
-    <b>ℹ️ Info:</b> Data real-time via MQTT, disimpan ke <b>Firebase</b> tiap 10 detik. Setting setpoint suhu di panel di bawah.
+    <b>ℹ️ Info:</b> Data disimpan langsung oleh <b>ESP32</b> ke Firebase setiap <b>10 detik</b> (24/7, walau web ditutup). Web hanya untuk tampilan & kontrol.
   </div>
 
   <div class="statusbar">
@@ -175,7 +172,6 @@ footer{text-align:center;color:var(--sub);font-size:.75rem;padding:24px 0 8px;}
     <div class="item">Total log: <b id="totalLog">--</b></div>
   </div>
 
-  <!-- ============ SETPOINT PANEL ============ -->
   <div class="setpoint-card">
     <h2>⚙️ Pengaturan Setpoint Suhu</h2>
     <div class="sp-grid">
@@ -452,10 +448,10 @@ footer{text-align:center;color:var(--sub);font-size:.75rem;padding:24px 0 8px;}
     <p><b>Monitoring Suhu Rak Server</b> adalah sistem monitoring & kontrol suhu rak server berbasis <b>ESP32-S3</b> dengan <b>MQTT</b> + <b>Firebase Realtime Database</b>.</p>
     <p><b>Fitur:</b></p>
     <ul>
+      <li>ESP32 kirim data <b>langsung ke Firebase</b> setiap 10 detik (24/7)</li>
       <li>Monitoring real-time DHT22 + 2× DS18B20</li>
       <li>Setpoint suhu editable dari web (tersimpan di EEPROM)</li>
       <li>Kontrol otomatis Peltier dengan histeresis</li>
-      <li>Proteksi dingin (Peltier OFF jika suhu terlalu rendah)</li>
       <li>Siklus exhaust fan otomatis (1 menit ON / 5 menit)</li>
       <li>Mode Manual via MQTT</li>
       <li>WiFi Manager (AP mode jika WiFi gagal)</li>
@@ -471,8 +467,7 @@ footer{text-align:center;color:var(--sub);font-size:.75rem;padding:24px 0 8px;}
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-analytics.js";
-import { getDatabase, ref, push, set, get, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import { getDatabase, ref, get, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyC3vaV1ldUOgb3LMLClzZPx63fmSei5cHw",
@@ -486,7 +481,6 @@ const firebaseConfig = {
 };
 
 const fbApp = initializeApp(firebaseConfig);
-try { getAnalytics(fbApp); } catch(e){ console.warn('Analytics skip:', e); }
 const db = getDatabase(fbApp);
 
 const MQTT_BROKER_WS = 'wss://broker.hivemq.com:8884/mqtt';
@@ -503,45 +497,11 @@ var refreshTimer = null;
 var currentRefreshMs = 5000;
 var lastData = null;
 var lastStatus = null;
-var lastSavedTs = 0;
-var SAVE_INTERVAL = 10000;
 var fbDates = [];
 
 function setFbStatus(text, ok){
   document.getElementById('fbStatus').textContent = text;
   document.getElementById('fbDot').className = 'dot fb ' + (ok ? 'on' : 'off');
-}
-
-async function saveToFirebase(data){
-  try {
-    const tRak  = Number(data.tRak)  || 0;
-    const rh    = Number(data.rh)    || 0;
-    const tPel1 = Number(data.tPel1) || 0;
-    const tPel2 = Number(data.tPel2) || 0;
-    if (tRak === 0 && rh === 0 && tPel1 === 0 && tPel2 === 0) return;
-
-    const now = new Date();
-    const dateKey = now.toISOString().slice(0,10);
-
-    const peltier = lastStatus ? !!lastStatus.peltier : false;
-    const fan     = lastStatus ? !!lastStatus.fan : false;
-    const manual  = lastStatus ? !!lastStatus.manual : false;
-
-    const payload = {
-      t: now.toISOString(), ts: Date.now(),
-      tRak: tRak, rh: rh, tPel1: tPel1, tPel2: tPel2,
-      peltier: peltier, fan: fan, mode: manual
-    };
-
-    await set(push(ref(db, 'rak_logs_by_date/' + dateKey)), payload);
-    await set(push(ref(db, 'rak_logs')), payload);
-    await set(ref(db, 'rak_latest'), payload);
-
-    setFbStatus('Tersimpan ' + new Date().toLocaleTimeString('id-ID'), true);
-  } catch(e){
-    console.error('[FB] save error:', e);
-    setFbStatus('Error: ' + e.message, false);
-  }
 }
 
 async function loadFirebaseDates(){
@@ -717,15 +677,11 @@ function saveSetpoint(){
   var mn = parseFloat(document.getElementById('spMin').value);
   var mx = parseFloat(document.getElementById('spMax').value);
   var of = parseFloat(document.getElementById('spOff').value);
-
   if (isNaN(mn) || isNaN(mx) || isNaN(of)) return showSpStatus('❌ Isi semua angka!', false);
   if (mn >= mx) return showSpStatus('❌ Batas bawah harus < batas atas', false);
   if (of >= mx) return showSpStatus('❌ Histeresis harus < batas atas', false);
   if (of <= mn) return showSpStatus('❌ Histeresis harus > batas bawah', false);
-
-  client.publish(TOPIC_CMD, JSON.stringify({
-    setpoint: true, min: mn, max: mx, off: of
-  }));
+  client.publish(TOPIC_CMD, JSON.stringify({setpoint: true, min: mn, max: mx, off: of}));
   showSpStatus('✅ Setpoint terkirim: ' + mn + ' / ' + mx + ' / ' + of + '°C', true);
 }
 
@@ -814,10 +770,7 @@ function handleDataMessage(d){
 
   drawChart();
 
-  if (Date.now() - lastSavedTs > SAVE_INTERVAL){
-    lastSavedTs = Date.now();
-    saveToFirebase(d);
-  }
+  // NOTE: TIDAK ADA saveToFirebase() — ESP32 yang simpan
 }
 
 function handleStatusMessage(d){
@@ -826,6 +779,11 @@ function handleStatusMessage(d){
   document.getElementById('heap').textContent = (d.heap/1024).toFixed(1) + ' KB';
   document.getElementById('ip').textContent = d.ip;
   document.getElementById('serverTime').textContent = d.serverTime || '--';
+
+  // Status FB dari ESP32
+  if (d.fb !== undefined) {
+    setFbStatus(d.fb ? 'ESP32 OK' : 'ESP32 NO', !!d.fb);
+  }
 
   updateSpDisplay();
 
