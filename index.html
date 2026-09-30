@@ -13,9 +13,34 @@ body.night{--bg:#0b1220;--card:#131c2e;--text:#f1f5f9;--sub:#94a3b8;--accent:#3b
 body{background:var(--bg);color:var(--text);padding:18px;min-height:100vh;transition:background .3s,color .3s;}
 .wrap{max-width:1280px;margin:0 auto;}
 .header{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px 22px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;box-shadow:var(--shadow);margin-bottom:14px;}
-.logo{width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:flex;align-items:center;justify-content:center;font-size:1.6rem;flex-shrink:0;}
-.logo.day::after{content:'☀️';}
-.logo.night::after{content:'🌙';}
+
+/* ============ LOGO CUSTOM GAMBAR ============ */
+.logo{
+  width:60px;
+  height:60px;
+  border-radius:14px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
+  background-size:85%;
+  background-repeat:no-repeat;
+  background-position:center;
+  overflow:hidden;
+  transition:all .3s;
+}
+.logo.day{
+  background-image:url('logo-day.png');
+  background-color:#fff7ed;
+  border:2px solid #fb923c;
+}
+.logo.night{
+  background-image:url('logo-night.png');
+  background-color:#eff6ff;
+  border:2px solid #60a5fa;
+}
+.logo::after{content:'';display:none;}
+
 .title-block{flex:1;min-width:200px;}
 .title-block h1{font-size:1.3rem;font-weight:800;letter-spacing:-.3px;}
 .title-block .sub{font-size:.8rem;color:var(--sub);margin-top:2px;}
@@ -118,7 +143,7 @@ footer{text-align:center;color:var(--sub);font-size:.75rem;padding:24px 0 8px;}
 <body>
 <div class="wrap">
   <div class="header">
-    <div class="logo" id="logo"></div>
+    <div class="logo day" id="logo"></div>
     <div class="title-block">
       <h1>Monitoring Suhu Rak Server</h1>
       <div class="sub">ESP32-S3 · MQTT + Firebase · WiFi Manager</div>
@@ -422,6 +447,7 @@ footer{text-align:center;color:var(--sub);font-size:.75rem;padding:24px 0 8px;}
 </div>
 
 <script type="module">
+// ==================== FIREBASE ====================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-analytics.js";
 import { getDatabase, ref, push, set, get, query, limitToLast, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
@@ -441,12 +467,14 @@ const fbApp = initializeApp(firebaseConfig);
 try { getAnalytics(fbApp); } catch(e){ console.warn('Analytics skip:', e); }
 const db = getDatabase(fbApp);
 
+// ==================== MQTT ====================
 const MQTT_BROKER_WS = 'wss://broker.hivemq.com:8884/mqtt';
 const TOPIC_DATA     = 'rak/server/rakserver/data';
 const TOPIC_STATUS   = 'rak/server/rakserver/status';
 const TOPIC_CMD      = 'rak/server/rakserver/command';
 const TOPIC_LWT      = 'rak/server/rakserver/online';
 
+// ==================== STATE ====================
 var client = null;
 var history_ = [];
 var MAX_HIST = 5000;
@@ -454,10 +482,12 @@ var lastDataTime = 0;
 var refreshTimer = null;
 var currentRefreshMs = 5000;
 var lastData = null;
+var lastStatus = null;
 var lastSavedTs = 0;
 var SAVE_INTERVAL = 30000;
 var fbDates = [];
 
+// ==================== FIREBASE HELPERS ====================
 function setFbStatus(text, ok){
   document.getElementById('fbStatus').textContent = text;
   document.getElementById('fbDot').className = 'dot fb ' + (ok ? 'on' : 'off');
@@ -465,19 +495,43 @@ function setFbStatus(text, ok){
 
 async function saveToFirebase(data){
   try {
+    const tRak  = Number(data.tRak)  || 0;
+    const rh    = Number(data.rh)    || 0;
+    const tPel1 = Number(data.tPel1) || 0;
+    const tPel2 = Number(data.tPel2) || 0;
+
+    if (tRak === 0 && rh === 0 && tPel1 === 0 && tPel2 === 0) {
+      console.warn('[FB] Skip: semua 0');
+      return;
+    }
+
     const now = new Date();
     const dateKey = now.toISOString().slice(0,10);
+
+    const peltier = lastStatus ? !!lastStatus.peltier : false;
+    const fan     = lastStatus ? !!lastStatus.fan : false;
+    const manual  = lastStatus ? !!lastStatus.manual : false;
+
     const payload = {
-      t: now.toISOString(), ts: Date.now(),
-      tRak: data.tRak, rh: data.rh, tPel1: data.tPel1, tPel2: data.tPel2
+      t: now.toISOString(),
+      ts: Date.now(),
+      tRak: tRak,
+      rh: rh,
+      tPel1: tPel1,
+      tPel2: tPel2,
+      peltier: peltier,
+      fan: fan,
+      mode: manual
     };
+
     await set(push(ref(db, 'rak_logs_by_date/' + dateKey)), payload);
     await set(push(ref(db, 'rak_logs')), payload);
     await set(ref(db, 'rak_latest'), payload);
-    setFbStatus('Tersimpan', true);
+
+    setFbStatus('Tersimpan ' + new Date().toLocaleTimeString('id-ID'), true);
   } catch(e){
-    console.error('FB save error:', e);
-    setFbStatus('Error', false);
+    console.error('[FB] save error:', e);
+    setFbStatus('Error: ' + e.message, false);
   }
 }
 
@@ -497,13 +551,16 @@ async function loadFirebaseDates(){
       var items = [];
       child.forEach(gc => items.push(gc.val()));
       items.sort((a,b) => a.ts - b.ts);
-      fbDates.push({ date: child.key, items: items });
+      items = items.filter(x => !(x.tRak === 0 && x.rh === 0 && x.tPel1 === 0 && x.tPel2 === 0));
+      if (items.length > 0) {
+        fbDates.push({ date: child.key, items: items });
+      }
     });
     fbDates.sort((a,b) => b.date.localeCompare(a.date));
     renderLogTable();
     setFbStatus('Terhubung', true);
   } catch(e){
-    console.error('FB load error:', e);
+    console.error('[FB] load error:', e);
     tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--hot);padding:20px;">Gagal: ' + e.message + '</td></tr>';
     setFbStatus('Error', false);
   }
@@ -517,7 +574,7 @@ function renderLogTable(){
   }
   var html = '', totalPoints = 0;
   fbDates.forEach(function(g){
-    var temps = g.items.map(x => x.tRak);
+    var temps = g.items.map(x => Number(x.tRak));
     var avg = temps.reduce((a,b) => a+b, 0) / temps.length;
     var start = new Date(g.items[0].t).toLocaleTimeString('id-ID');
     var end = new Date(g.items[g.items.length-1].t).toLocaleTimeString('id-ID');
@@ -544,18 +601,51 @@ async function deleteDate(dateKey){
 
 async function clearAllLogs(){
   if (!confirm('Hapus SEMUA log? Tidak bisa dibatalkan!')) return;
-  try { await remove(ref(db, 'rak_logs_by_date')); await remove(ref(db, 'rak_logs')); await loadFirebaseDates(); }
-  catch(e){ alert('Gagal: ' + e.message); }
+  try {
+    await remove(ref(db, 'rak_logs_by_date'));
+    await remove(ref(db, 'rak_logs'));
+    await loadFirebaseDates();
+  } catch(e){ alert('Gagal: ' + e.message); }
+}
+
+// ==================== DOWNLOAD CSV ====================
+function buildCSV(items){
+  var delim = ';';
+  var csv = 'Waktu' + delim + 'Suhu Rak (C)' + delim + 'Kelembapan (%)' + delim
+    + 'Peltier 1 (C)' + delim + 'Peltier 2 (C)' + delim
+    + 'Peltier (Relay)' + delim + 'Fan (Relay)' + delim + 'Mode\n';
+
+  items.forEach(x => {
+    const waktu = new Date(x.t).toLocaleString('id-ID', {
+      year:'numeric', month:'2-digit', day:'2-digit',
+      hour:'2-digit', minute:'2-digit', second:'2-digit'
+    });
+    csv += waktu + delim
+      + Number(x.tRak).toFixed(1) + delim
+      + Number(x.rh).toFixed(0) + delim
+      + Number(x.tPel1).toFixed(1) + delim
+      + Number(x.tPel2).toFixed(1) + delim
+      + (x.peltier ? 'ON' : 'OFF') + delim
+      + (x.fan ? 'ON' : 'OFF') + delim
+      + (x.mode ? 'MANUAL' : 'AUTO') + '\n';
+  });
+  return csv;
+}
+
+function downloadCSVFile(name, csv){
+  var blob = new Blob(['\uFEFF' + csv], {type:'text/csv;charset=utf-8;'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url; a.download = name;
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
 
 function downloadDate(dateKey){
   var g = fbDates.find(x => x.date === dateKey);
   if (!g || g.items.length === 0) return alert('Tidak ada data');
-  var csv = 'Waktu,Suhu Rak (C),Kelembapan (%),Peltier 1 (C),Peltier 2 (C)\n';
-  g.items.forEach(x => {
-    csv += new Date(x.t).toLocaleString('id-ID') + ',' + x.tRak + ',' + x.rh + ',' + x.tPel1 + ',' + x.tPel2 + '\n';
-  });
-  downloadFile('log_rak_' + dateKey + '.csv', csv);
+  downloadCSVFile('log_rak_' + dateKey + '.csv', buildCSV(g.items));
 }
 
 function downloadToday(){
@@ -565,49 +655,92 @@ function downloadToday(){
 
 async function downloadAll(){
   try {
-    var q = query(ref(db, 'rak_logs'), limitToLast(5000));
-    var snap = await get(q);
+    const snap = await get(ref(db, 'rak_logs_by_date'));
     if (!snap.exists()) return alert('Belum ada data');
+
     var arr = [];
-    snap.forEach(c => arr.push(c.val()));
-    arr.sort((a,b) => a.ts - b.ts);
-    var csv = 'Waktu,Suhu Rak (C),Kelembapan (%),Peltier 1 (C),Peltier 2 (C)\n';
-    arr.forEach(x => {
-      csv += new Date(x.t).toLocaleString('id-ID') + ',' + x.tRak + ',' + x.rh + ',' + x.tPel1 + ',' + x.tPel2 + '\n';
+    snap.forEach(dateNode => {
+      dateNode.forEach(item => arr.push(item.val()));
     });
-    downloadFile('log_rak_semua.csv', csv);
+    arr.sort((a,b) => a.ts - b.ts);
+    arr = arr.filter(x => !(x.tRak === 0 && x.rh === 0 && x.tPel1 === 0 && x.tPel2 === 0));
+
+    if (arr.length === 0) return alert('Semua data kosong (0)');
+
+    downloadCSVFile('log_rak_semua.csv', buildCSV(arr));
+    alert('✅ Download ' + arr.length + ' baris data');
   } catch(e){ alert('Gagal: ' + e.message); }
 }
 
-function downloadFile(name, content){
-  var blob = new Blob([content], {type:'text/csv;charset=utf-8;'});
-  var url = URL.createObjectURL(blob);
-  var a = document.createElement('a');
-  a.href = url; a.download = name;
-  document.body.appendChild(a); a.click();
-  document.body.removeChild(a); URL.revokeObjectURL(url);
-}
-
+// ==================== EXCEL EXPORT ====================
 async function exportExcel(){
   try {
-    var q = query(ref(db, 'rak_logs'), limitToLast(5000));
-    var snap = await get(q);
-    if (!snap.exists()) return alert('Belum ada data');
+    const snap = await get(ref(db, 'rak_logs_by_date'));
+    if (!snap.exists()) return alert('Belum ada data di Firebase');
+
     var arr = [];
-    snap.forEach(c => arr.push(c.val()));
+    snap.forEach(dateNode => {
+      dateNode.forEach(item => arr.push(item.val()));
+    });
+
+    if (arr.length === 0) return alert('Belum ada data');
+
     arr.sort((a,b) => a.ts - b.ts);
-    var rows = arr.map(x => ({
-      'Waktu': new Date(x.t).toLocaleString('id-ID'),
-      'Suhu Rak (C)': x.tRak, 'Kelembapan (%)': x.rh,
-      'Peltier 1 (C)': x.tPel1, 'Peltier 2 (C)': x.tPel2
-    }));
-    var ws = XLSX.utils.json_to_sheet(rows);
+    arr = arr.filter(x => !(x.tRak === 0 && x.rh === 0 && x.tPel1 === 0 && x.tPel2 === 0));
+
+    if (arr.length === 0) return alert('Semua data kosong (0)');
+
+    var wsData = [
+      ['Waktu', 'Suhu Rak (C)', 'Kelembapan (%)', 'Peltier 1 (C)', 'Peltier 2 (C)',
+       'Peltier (Relay)', 'Fan (Relay)', 'Mode']
+    ];
+
+    arr.forEach(x => {
+      const waktu = new Date(x.t).toLocaleString('id-ID', {
+        year:'numeric', month:'2-digit', day:'2-digit',
+        hour:'2-digit', minute:'2-digit', second:'2-digit'
+      });
+      wsData.push([
+        waktu,
+        parseFloat(Number(x.tRak).toFixed(1)),
+        parseFloat(Number(x.rh).toFixed(0)),
+        parseFloat(Number(x.tPel1).toFixed(1)),
+        parseFloat(Number(x.tPel2).toFixed(1)),
+        x.peltier ? 'ON' : 'OFF',
+        x.fan ? 'ON' : 'OFF',
+        x.mode ? 'MANUAL' : 'AUTO'
+      ]);
+    });
+
+    var ws = XLSX.utils.aoa_to_sheet(wsData);
+    ws['!cols'] = [
+      { wch: 22 }, { wch: 14 }, { wch: 16 }, { wch: 14 },
+      { wch: 14 }, { wch: 15 }, { wch: 12 }, { wch: 10 }
+    ];
+
+    var range = XLSX.utils.decode_range(ws['!ref']);
+    for (var R = 1; R <= range.e.r; R++) {
+      for (var C = 1; C <= 4; C++) {
+        var addr = XLSX.utils.encode_cell({r:R, c:C});
+        if (ws[addr]) {
+          ws[addr].t = 'n';
+          ws[addr].v = Number(ws[addr].v);
+          ws[addr].z = '0.0';
+        }
+      }
+    }
+
     var wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Log Rak Server');
     XLSX.writeFile(wb, 'Log_RakServer_' + new Date().toISOString().slice(0,10) + '.xlsx');
-  } catch(e){ alert('Gagal: ' + e.message); }
+    alert('✅ Export berhasil: ' + arr.length + ' baris');
+  } catch(e){
+    console.error(e);
+    alert('Gagal export: ' + e.message);
+  }
 }
 
+// ==================== MQTT ====================
 function connectMQTT(){
   setMqttStatus('Menghubungkan...', false);
   client = mqtt.connect(MQTT_BROKER_WS, {
@@ -646,10 +779,10 @@ function handleDataMessage(d){
   lastDataTime = Date.now();
   lastData = d;
   updateDeviceStatus();
-  document.getElementById('tRak').textContent = d.tRak.toFixed(1);
-  document.getElementById('rh').textContent = d.rh.toFixed(0);
-  document.getElementById('tPel1').textContent = d.tPel1.toFixed(1);
-  document.getElementById('tPel2').textContent = d.tPel2.toFixed(1);
+  document.getElementById('tRak').textContent = Number(d.tRak).toFixed(1);
+  document.getElementById('rh').textContent = Number(d.rh).toFixed(0);
+  document.getElementById('tPel1').textContent = Number(d.tPel1).toFixed(1);
+  document.getElementById('tPel2').textContent = Number(d.tPel2).toFixed(1);
 
   var badge = document.getElementById('badgeRak');
   var statusTxt = document.getElementById('statusRakTxt');
@@ -674,6 +807,7 @@ function handleDataMessage(d){
 }
 
 function handleStatusMessage(d){
+  lastStatus = d;
   document.getElementById('rssi').textContent = d.rssi + ' dBm';
   document.getElementById('heap').textContent = (d.heap/1024).toFixed(1) + ' KB';
   document.getElementById('ip').textContent = d.ip;
@@ -749,6 +883,7 @@ function updatePeltierAnim(num, on){
   wrap.classList.toggle('cold-active', on);
 }
 
+// ==================== CHART ====================
 function drawChart(){
   var c = document.getElementById('chart');
   var dpr = window.devicePixelRatio || 1;
@@ -769,7 +904,7 @@ function drawChart(){
     document.getElementById('chartRange').textContent = 'Menunggu data...';
     return;
   }
-  var temps = data.map(x => x.tRak);
+  var temps = data.map(x => Number(x.tRak));
   var minV = Math.min(...temps), maxV = Math.max(...temps);
   var yMin = Math.floor(minV - 2), yMax = Math.ceil(maxV + 2);
   if (yMax - yMin < 5) yMax = yMin + 5;
@@ -807,6 +942,7 @@ function drawChart(){
     data.length + ' titik · ' + minV.toFixed(1) + '°C – ' + maxV.toFixed(1) + '°C';
 }
 
+// ==================== THEME ====================
 function applyTheme(n){
   document.body.classList.toggle('night',n);
   document.getElementById('themeBtn').textContent = n ? '☀️ Siang' : '🌙 Malam';
@@ -817,6 +953,7 @@ function applyTheme(n){
 function toggleTheme(){applyTheme(!document.body.classList.contains('night'));}
 (function(){var s=localStorage.getItem('night');applyTheme(s==='1');})();
 
+// ==================== INIT ====================
 connectMQTT();
 setRefreshInterval(5000);
 loadFirebaseDates();
