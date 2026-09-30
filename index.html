@@ -13,10 +13,9 @@ body.night{--bg:#0b1220;--card:#131c2e;--text:#f1f5f9;--sub:#94a3b8;--accent:#3b
 body{background:var(--bg);color:var(--text);padding:18px;min-height:100vh;transition:background .3s,color .3s;}
 .wrap{max-width:1280px;margin:0 auto;}
 .header{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px 22px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;box-shadow:var(--shadow);margin-bottom:14px;}
-.logo{width:60px;height:60px;border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;transition:all .3s;font-size:1.9rem;line-height:1;}
-.logo.day{background:linear-gradient(135deg,#fb923c,#f59e0b);box-shadow:0 4px 12px rgba(245,158,11,.35);}
-.logo.night{background:linear-gradient(135deg,#3b82f6,#60a5fa);box-shadow:0 4px 12px rgba(59,130,246,.35);}
-.logo::after{content:'🌡️';display:inline-block;filter:drop-shadow(0 2px 4px rgba(0,0,0,.2));}
+.logo{width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:flex;align-items:center;justify-content:center;font-size:1.6rem;flex-shrink:0;}
+.logo.day::after{content:'☀️';}
+.logo.night::after{content:'🌙';}
 .title-block{flex:1;min-width:200px;}
 .title-block h1{font-size:1.3rem;font-weight:800;letter-spacing:-.3px;}
 .title-block .sub{font-size:.8rem;color:var(--sub);margin-top:2px;}
@@ -119,7 +118,7 @@ footer{text-align:center;color:var(--sub);font-size:.75rem;padding:24px 0 8px;}
 <body>
 <div class="wrap">
   <div class="header">
-    <div class="logo day" id="logo"></div>
+    <div class="logo" id="logo"></div>
     <div class="title-block">
       <h1>Monitoring Suhu Rak Server</h1>
       <div class="sub">ESP32-S3 · MQTT + Firebase · WiFi Manager</div>
@@ -423,9 +422,10 @@ footer{text-align:center;color:var(--sub);font-size:.75rem;padding:24px 0 8px;}
 </div>
 
 <script type="module">
+// ==================== FIREBASE ====================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-analytics.js";
-import { getDatabase, ref, push, set, get, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import { getDatabase, ref, push, set, get, query, limitToLast, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyC3vaV1ldUOgb3LMLClzZPx63fmSei5cHw",
@@ -442,12 +442,14 @@ const fbApp = initializeApp(firebaseConfig);
 try { getAnalytics(fbApp); } catch(e){ console.warn('Analytics skip:', e); }
 const db = getDatabase(fbApp);
 
+// ==================== MQTT ====================
 const MQTT_BROKER_WS = 'wss://broker.hivemq.com:8884/mqtt';
 const TOPIC_DATA     = 'rak/server/rakserver/data';
 const TOPIC_STATUS   = 'rak/server/rakserver/status';
 const TOPIC_CMD      = 'rak/server/rakserver/command';
 const TOPIC_LWT      = 'rak/server/rakserver/online';
 
+// ==================== STATE ====================
 var client = null;
 var history_ = [];
 var MAX_HIST = 5000;
@@ -460,6 +462,7 @@ var lastSavedTs = 0;
 var SAVE_INTERVAL = 30000;
 var fbDates = [];
 
+// ==================== FIREBASE HELPERS ====================
 function setFbStatus(text, ok){
   document.getElementById('fbStatus').textContent = text;
   document.getElementById('fbDot').className = 'dot fb ' + (ok ? 'on' : 'off');
@@ -472,6 +475,7 @@ async function saveToFirebase(data){
     const tPel1 = Number(data.tPel1) || 0;
     const tPel2 = Number(data.tPel2) || 0;
 
+    // Skip kalau semua 0
     if (tRak === 0 && rh === 0 && tPel1 === 0 && tPel2 === 0) {
       console.warn('[FB] Skip: semua 0');
       return;
@@ -480,6 +484,7 @@ async function saveToFirebase(data){
     const now = new Date();
     const dateKey = now.toISOString().slice(0,10);
 
+    // Ambil status relay dari lastStatus
     const peltier = lastStatus ? !!lastStatus.peltier : false;
     const fan     = lastStatus ? !!lastStatus.fan : false;
     const manual  = lastStatus ? !!lastStatus.manual : false;
@@ -501,6 +506,7 @@ async function saveToFirebase(data){
     await set(ref(db, 'rak_latest'), payload);
 
     setFbStatus('Tersimpan ' + new Date().toLocaleTimeString('id-ID'), true);
+    console.log('[FB] Saved:', payload);
   } catch(e){
     console.error('[FB] save error:', e);
     setFbStatus('Error: ' + e.message, false);
@@ -523,7 +529,8 @@ async function loadFirebaseDates(){
       var items = [];
       child.forEach(gc => items.push(gc.val()));
       items.sort((a,b) => a.ts - b.ts);
-      items = items.filter(x => !(Number(x.tRak) === 0 && Number(x.rh) === 0 && Number(x.tPel1) === 0 && Number(x.tPel2) === 0));
+      // Filter data 0
+      items = items.filter(x => !(x.tRak === 0 && x.rh === 0 && x.tPel1 === 0 && x.tPel2 === 0));
       if (items.length > 0) {
         fbDates.push({ date: child.key, items: items });
       }
@@ -580,13 +587,8 @@ async function clearAllLogs(){
   } catch(e){ alert('Gagal: ' + e.message); }
 }
 
-function fmtTime(iso){
-  const d = new Date(iso);
-  const pad = n => String(n).padStart(2,'0');
-  return pad(d.getDate()) + '/' + pad(d.getMonth()+1) + '/' + d.getFullYear()
-    + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
-}
-
+// ==================== DOWNLOAD CSV ====================
+// Pakai delimiter ';' + BOM UTF-8 supaya Excel Indonesia baca benar
 function buildCSV(items){
   var delim = ';';
   var csv = 'Waktu' + delim + 'Suhu Rak (C)' + delim + 'Kelembapan (%)' + delim
@@ -594,7 +596,11 @@ function buildCSV(items){
     + 'Peltier (Relay)' + delim + 'Fan (Relay)' + delim + 'Mode\n';
 
   items.forEach(x => {
-    csv += fmtTime(x.t) + delim
+    const waktu = new Date(x.t).toLocaleString('id-ID', {
+      year:'numeric', month:'2-digit', day:'2-digit',
+      hour:'2-digit', minute:'2-digit', second:'2-digit'
+    });
+    csv += waktu + delim
       + Number(x.tRak).toFixed(1) + delim
       + Number(x.rh).toFixed(0) + delim
       + Number(x.tPel1).toFixed(1) + delim
@@ -631,35 +637,54 @@ async function downloadAll(){
   try {
     const snap = await get(ref(db, 'rak_logs_by_date'));
     if (!snap.exists()) return alert('Belum ada data');
+
     var arr = [];
-    snap.forEach(dateNode => { dateNode.forEach(item => arr.push(item.val())); });
+    snap.forEach(dateNode => {
+      dateNode.forEach(item => arr.push(item.val()));
+    });
     arr.sort((a,b) => a.ts - b.ts);
-    arr = arr.filter(x => !(Number(x.tRak) === 0 && Number(x.rh) === 0 && Number(x.tPel1) === 0 && Number(x.tPel2) === 0));
+    arr = arr.filter(x => !(x.tRak === 0 && x.rh === 0 && x.tPel1 === 0 && x.tPel2 === 0));
+
     if (arr.length === 0) return alert('Semua data kosong (0)');
+
     downloadCSVFile('log_rak_semua.csv', buildCSV(arr));
     alert('✅ Download ' + arr.length + ' baris data');
   } catch(e){ alert('Gagal: ' + e.message); }
 }
 
+// ==================== EXCEL EXPORT ====================
 async function exportExcel(){
   try {
     const snap = await get(ref(db, 'rak_logs_by_date'));
     if (!snap.exists()) return alert('Belum ada data di Firebase');
+
     var arr = [];
-    snap.forEach(dateNode => { dateNode.forEach(item => arr.push(item.val())); });
+    snap.forEach(dateNode => {
+      dateNode.forEach(item => arr.push(item.val()));
+    });
+
     if (arr.length === 0) return alert('Belum ada data');
+
     arr.sort((a,b) => a.ts - b.ts);
-    arr = arr.filter(x => !(Number(x.tRak) === 0 && Number(x.rh) === 0 && Number(x.tPel1) === 0 && Number(x.tPel2) === 0));
+    arr = arr.filter(x => !(x.tRak === 0 && x.rh === 0 && x.tPel1 === 0 && x.tPel2 === 0));
+
     if (arr.length === 0) return alert('Semua data kosong (0)');
 
+    console.log('[Export] Total:', arr.length);
+
+    // Array-of-arrays: baris pertama header
     var wsData = [
       ['Waktu', 'Suhu Rak (C)', 'Kelembapan (%)', 'Peltier 1 (C)', 'Peltier 2 (C)',
        'Peltier (Relay)', 'Fan (Relay)', 'Mode']
     ];
 
     arr.forEach(x => {
+      const waktu = new Date(x.t).toLocaleString('id-ID', {
+        year:'numeric', month:'2-digit', day:'2-digit',
+        hour:'2-digit', minute:'2-digit', second:'2-digit'
+      });
       wsData.push([
-        fmtTime(x.t),
+        waktu,
         parseFloat(Number(x.tRak).toFixed(1)),
         parseFloat(Number(x.rh).toFixed(0)),
         parseFloat(Number(x.tPel1).toFixed(1)),
@@ -672,13 +697,20 @@ async function exportExcel(){
 
     var ws = XLSX.utils.aoa_to_sheet(wsData);
     ws['!cols'] = [
-      { wch: 22 }, { wch: 14 }, { wch: 16 }, { wch: 14 },
-      { wch: 14 }, { wch: 15 }, { wch: 12 }, { wch: 10 }
+      { wch: 22 }, // Waktu
+      { wch: 14 }, // Suhu Rak
+      { wch: 16 }, // Kelembapan
+      { wch: 14 }, // Peltier 1
+      { wch: 14 }, // Peltier 2
+      { wch: 15 }, // Peltier Relay
+      { wch: 12 }, // Fan Relay
+      { wch: 10 }  // Mode
     ];
 
+    // Paksa kolom angka jadi tipe 'n' (number) bukan tanggal/jam
     var range = XLSX.utils.decode_range(ws['!ref']);
     for (var R = 1; R <= range.e.r; R++) {
-      for (var C = 1; C <= 4; C++) {
+      for (var C = 1; C <= 4; C++) { // kolom B-E (index 1-4)
         var addr = XLSX.utils.encode_cell({r:R, c:C});
         if (ws[addr]) {
           ws[addr].t = 'n';
@@ -690,6 +722,7 @@ async function exportExcel(){
 
     var wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Log Rak Server');
+
     XLSX.writeFile(wb, 'Log_RakServer_' + new Date().toISOString().slice(0,10) + '.xlsx');
     alert('✅ Export berhasil: ' + arr.length + ' baris');
   } catch(e){
@@ -698,6 +731,7 @@ async function exportExcel(){
   }
 }
 
+// ==================== MQTT ====================
 function connectMQTT(){
   setMqttStatus('Menghubungkan...', false);
   client = mqtt.connect(MQTT_BROKER_WS, {
@@ -840,6 +874,7 @@ function updatePeltierAnim(num, on){
   wrap.classList.toggle('cold-active', on);
 }
 
+// ==================== CHART ====================
 function drawChart(){
   var c = document.getElementById('chart');
   var dpr = window.devicePixelRatio || 1;
@@ -898,6 +933,7 @@ function drawChart(){
     data.length + ' titik · ' + minV.toFixed(1) + '°C – ' + maxV.toFixed(1) + '°C';
 }
 
+// ==================== THEME ====================
 function applyTheme(n){
   document.body.classList.toggle('night',n);
   document.getElementById('themeBtn').textContent = n ? '☀️ Siang' : '🌙 Malam';
@@ -908,12 +944,14 @@ function applyTheme(n){
 function toggleTheme(){applyTheme(!document.body.classList.contains('night'));}
 (function(){var s=localStorage.getItem('night');applyTheme(s==='1');})();
 
+// ==================== INIT ====================
 connectMQTT();
 setRefreshInterval(5000);
 loadFirebaseDates();
 window.addEventListener('resize', drawChart);
 setInterval(updateDeviceStatus, 5000);
 
+// Expose global
 window.setMode = setMode;
 window.setRelay = setRelay;
 window.refreshNow = refreshNow;
