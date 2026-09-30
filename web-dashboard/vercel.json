@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "name": "rak-server-dashboard",
+  "cleanUrls": true,
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff" }
+      ]
+    }
+  ]
+}
