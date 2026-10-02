@@ -13,13 +13,10 @@ body.night{--bg:#0b1220;--card:#131c2e;--text:#f1f5f9;--sub:#94a3b8;--accent:#3b
 body{background:var(--bg);color:var(--text);padding:18px;min-height:100vh;transition:background .3s,color .3s;}
 .wrap{max-width:1280px;margin:0 auto;}
 .header{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px 22px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;box-shadow:var(--shadow);margin-bottom:14px;}
-
-/* ============ LOGO POLINDRA ============ */
 .logo{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;transition:all .3s;background-size:80%;background-repeat:no-repeat;background-position:center;background-color:#fff;border:2px solid #1e3a8a;box-shadow:0 4px 12px rgba(30,58,138,.25);}
 .logo.day{background-image:url('logo-polindra.png');}
 .logo.night{background-image:url('logo-polindra.png');background-color:#f1f5f9;border-color:#60a5fa;box-shadow:0 4px 12px rgba(59,130,246,.35);}
 .logo::after{content:'';display:none;}
-
 .title-block{flex:1;min-width:200px;cursor:pointer;transition:transform .2s;border-radius:8px;padding:4px 8px;margin:-4px -8px;}
 .title-block:hover{background:var(--chip);transform:translateX(2px);}
 .title-block h1{font-size:1.3rem;font-weight:800;letter-spacing:-.3px;display:flex;align-items:center;gap:8px;}
@@ -45,7 +42,6 @@ body{background:var(--bg);color:var(--text);padding:18px;min-height:100vh;transi
 .modal-close:hover{background:var(--hot);color:#fff;border-color:var(--hot);}
 .modal-body{padding:20px 24px;font-size:.88rem;line-height:1.7;color:var(--text);}
 .modal-body p{margin-bottom:12px;}
-.modal-body b{color:var(--text);font-weight:700;}
 .modal-body ul{list-style:none;padding-left:0;margin:8px 0 16px;}
 .modal-body ul li{padding:6px 0 6px 28px;position:relative;color:var(--sub);}
 .modal-body ul li::before{content:'✓';position:absolute;left:0;top:6px;color:var(--ok);font-weight:800;font-size:1rem;}
@@ -70,8 +66,8 @@ body{background:var(--bg);color:var(--text);padding:18px;min-height:100vh;transi
 .sp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:14px;}
 .sp-item{background:var(--chip);border:1px solid var(--border);border-radius:12px;padding:12px;}
 .sp-item label{display:block;font-size:.72rem;font-weight:700;color:var(--sub);text-transform:uppercase;margin-bottom:6px;letter-spacing:.3px;}
-.sp-item input{width:100%;padding:10px;border:2px solid var(--border);border-radius:8px;font-size:1.1rem;font-weight:800;text-align:center;color:var(--text);background:var(--card);transition:border-color .2s,box-shadow .2s;}
-.sp-item input:focus{outline:0;border-color:var(--accent);box-shadow:0 0 0 3px rgba(13,110,253,.15);}
+.sp-item input,.sp-item select{width:100%;padding:10px;border:2px solid var(--border);border-radius:8px;font-size:1rem;font-weight:800;text-align:center;color:var(--text);background:var(--card);transition:border-color .2s,box-shadow .2s;}
+.sp-item input:focus,.sp-item select:focus{outline:0;border-color:var(--accent);box-shadow:0 0 0 3px rgba(13,110,253,.15);}
 .sp-item .hint{font-size:.65rem;color:var(--sub);margin-top:4px;line-height:1.4;}
 .sp-actions{display:flex;gap:8px;flex-wrap:wrap;}
 .sp-actions button{padding:10px 20px;border-radius:10px;border:0;font-weight:700;font-size:.85rem;cursor:pointer;transition:opacity .2s,transform .1s;}
@@ -166,14 +162,6 @@ footer{text-align:center;color:var(--sub);font-size:.75rem;padding:24px 0 8px;}
       <div class="sub">ESP32-S3 · MQTT + Firebase · Politeknik Negeri Indramayu</div>
     </div>
     <div class="toolbar">
-      <select id="refreshSelect" onchange="setRefreshInterval(this.value)">
-        <option value="2000">Update 2s</option>
-        <option value="5000" selected>Update 5s</option>
-        <option value="300000">Update 5m</option>
-        <option value="600000">Update 10m</option>
-        <option value="1800000">Update 30m</option>
-        <option value="3600000">Update 1j</option>
-      </select>
       <button id="btnRefresh" onclick="doRefresh()"><span id="refreshIcon">🔄</span> Refresh</button>
       <button class="primary" onclick="exportExcel()">📊 Excel</button>
       <button id="themeBtn" onclick="toggleTheme()">🌙 Malam</button>
@@ -181,7 +169,7 @@ footer{text-align:center;color:var(--sub);font-size:.75rem;padding:24px 0 8px;}
   </div>
 
   <div class="banner">
-    <b>ℹ️ Info:</b> Data disimpan langsung oleh <b>ESP32</b> ke Firebase setiap <b>10 detik</b> (24/7, walau web ditutup). Klik <b>judul</b> untuk info lengkap proyek.
+    <b>ℹ️ Info:</b> Klik <b>judul</b> untuk info proyek. <b>Refresh</b> hanya manual (klik tombol). Setting interval simpan Firebase di panel bawah.
   </div>
 
   <div class="statusbar">
@@ -197,7 +185,7 @@ footer{text-align:center;color:var(--sub);font-size:.75rem;padding:24px 0 8px;}
   </div>
 
   <div class="setpoint-card">
-    <h2>⚙️ Pengaturan Setpoint Suhu</h2>
+    <h2>⚙️ Pengaturan Setpoint Suhu & Interval</h2>
     <div class="sp-grid">
       <div class="sp-item">
         <label>🌡️ Batas Bawah</label>
@@ -214,10 +202,22 @@ footer{text-align:center;color:var(--sub);font-size:.75rem;padding:24px 0 8px;}
         <input type="number" step="0.5" id="spOff" value="22.5">
         <div class="hint">Peltier OFF jika suhu ≤ nilai ini</div>
       </div>
+      <div class="sp-item">
+        <label>⏱️ Interval Simpan Firebase</label>
+        <select id="fbInterval">
+          <option value="2000">2 detik</option>
+          <option value="5000">5 detik</option>
+          <option value="10000" selected>10 detik</option>
+          <option value="30000">30 detik</option>
+          <option value="60000">1 menit</option>
+          <option value="300000">5 menit</option>
+        </select>
+        <div class="hint">Seberapa sering ESP32 simpan ke Firebase</div>
+      </div>
     </div>
     <div class="sp-actions">
-      <button class="save" onclick="saveSetpoint()">💾 Simpan Setpoint</button>
-      <button class="reset" onclick="loadSetpoint()">🔄 Muat Ulang</button>
+      <button class="save" onclick="saveSetpoint()">💾 Simpan Semua</button>
+      <button class="reset" onclick="loadSetpoint()">🔄 Muat Ulang dari ESP32</button>
     </div>
     <div class="sp-status" id="spStatus"></div>
   </div>
@@ -454,7 +454,7 @@ footer{text-align:center;color:var(--sub);font-size:.75rem;padding:24px 0 8px;}
     <div class="log-actions">
       <button class="btn-sm green" onclick="downloadToday()">⬇️ Download Hari Ini</button>
       <button class="btn-sm blue" onclick="downloadAll()">⬇️ Download Semua</button>
-      <button class="btn-sm" onclick="loadFirebaseDates()">🔄 Muat Ulang</button>
+      <button class="btn-sm" onclick="loadFirebaseDates()">🔄 Muat Ulang Log</button>
       <button class="btn-sm red" onclick="clearAllLogs()">🗑️ Hapus Semua</button>
     </div>
     <div class="log-scroll">
@@ -477,71 +477,27 @@ footer{text-align:center;color:var(--sub);font-size:.75rem;padding:24px 0 8px;}
       <button class="modal-close" onclick="closeAbout()" title="Tutup">×</button>
     </div>
     <div class="modal-body">
-      <p><b>Monitoring Suhu Rak Server</b> adalah sistem monitoring & kontrol suhu rak server berbasis <b>ESP32-S3</b> dengan <b>MQTT</b> + <b>Firebase Realtime Database</b>. Proyek ini dikembangkan di <b>Politeknik Negeri Indramayu</b>.</p>
-
+      <p><b>Monitoring Suhu Rak Server</b> adalah sistem monitoring & kontrol suhu rak server berbasis <b>ESP32-S3</b> dengan <b>MQTT</b> + <b>Firebase Realtime Database</b>. Dikembangkan di <b>Politeknik Negeri Indramayu</b>.</p>
       <h3>🎯 Fitur Utama</h3>
       <ul>
-        <li>ESP32 kirim data <b>langsung ke Firebase</b> setiap 10 detik (24/7, walau web ditutup)</li>
+        <li>ESP32 kirim data <b>langsung ke Firebase</b> (24/7)</li>
+        <li>Interval simpan Firebase <b>editable dari web</b> (2s - 5m)</li>
+        <li>Tombol <b>Refresh manual</b> (bukan auto-refresh)</li>
         <li>Monitoring real-time DHT22 + 2× DS18B20</li>
-        <li>Setpoint suhu editable dari web (tersimpan di EEPROM)</li>
-        <li>Kontrol otomatis Peltier dengan histeresis</li>
-        <li>Proteksi dingin (Peltier OFF jika suhu terlalu rendah)</li>
-        <li>Siklus exhaust fan otomatis (1 menit ON / 5 menit)</li>
-        <li>Mode Manual via MQTT</li>
-        <li>WiFi Manager (AP mode jika WiFi gagal)</li>
+        <li>Setpoint editable (tersimpan di EEPROM)</li>
         <li>Log permanen Firebase + export Excel per kolom</li>
-        <li>Grafik trend interaktif</li>
-        <li>Mode malam/siang</li>
+        <li>Grafik trend interaktif + mode malam/siang</li>
       </ul>
-
       <h3>🔧 Hardware</h3>
-      <p>
-        <span class="chip">ESP32-S3</span>
-        <span class="chip">DHT22</span>
-        <span class="chip">2× DS18B20</span>
-        <span class="chip">3× Relay</span>
-        <span class="chip">LCD I2C 16×2</span>
-        <span class="chip">2× Peltier</span>
-        <span class="chip">Exhaust Fan</span>
-      </p>
-
-      <h3>📡 Protokol & Topic MQTT</h3>
-      <p>Broker: <span class="chip">broker.hivemq.com</span></p>
-      <p>Topic:</p>
+      <p><span class="chip">ESP32-S3</span> <span class="chip">DHT22</span> <span class="chip">2× DS18B20</span> <span class="chip">3× Relay</span> <span class="chip">LCD I2C</span> <span class="chip">2× Peltier</span> <span class="chip">Fan</span></p>
+      <h3>⏱️ Interval Sistem</h3>
       <ul>
-        <li><span class="chip">rak/server/rakserver/data</span> — data sensor</li>
-        <li><span class="chip">rak/server/rakserver/status</span> — status relay & device</li>
-        <li><span class="chip">rak/server/rakserver/command</span> — kontrol dari web</li>
-        <li><span class="chip">rak/server/rakserver/online</span> — LWT online/offline</li>
+        <li>Baca sensor: <b>2 detik</b></li>
+        <li>Kirim MQTT: <b>5 detik</b></li>
+        <li>Simpan Firebase: <b>default 10 detik</b> (bisa diubah dari web)</li>
       </ul>
-
-      <h3>🔥 Firebase</h3>
-      <p>Project: <span class="chip">monitoring-rakserver</span></p>
-      <p>Path: <span class="chip">rak_logs_by_date/{tanggal}/{timestamp}</span></p>
-
-      <h3>⚙️ Setpoint Default</h3>
-      <ul>
-        <li>Batas Bawah: <b>18.0°C</b> (proteksi dingin)</li>
-        <li>Batas Atas: <b>28.0°C</b> (Peltier ON)</li>
-        <li>Histeresis: <b>22.5°C</b> (Peltier OFF)</li>
-      </ul>
-
-      <h3>🔄 Cara Kerja Kontrol Peltier</h3>
-      <ul>
-        <li>Suhu ≥ 28°C → Peltier <b>ON</b></li>
-        <li>Suhu ≤ 22.5°C → Peltier <b>OFF</b></li>
-        <li>Suhu antara 22.5-28°C → <b>tahan</b> state terakhir</li>
-        <li>Suhu &lt; 18°C → Peltier <b>OFF paksa</b> (proteksi)</li>
-      </ul>
-
-      <h3>🏫 Institusi</h3>
-      <p>Politeknik Negeri Indramayu</p>
-
-      <h3>🌐 URL Terkait</h3>
-      <p>
-        Web Dashboard: <span class="chip">monitoring-rakserver.vercel.app</span><br>
-        WiFi Manager: <span class="chip">http://&lt;IP_ESP32&gt;</span>
-      </p>
+      <h3>🌐 URL</h3>
+      <p>Web: <span class="chip">monitoring-rakserver.vercel.app</span><br>WiFi Manager: <span class="chip">http://&lt;IP_ESP32&gt;</span></p>
     </div>
     <div class="modal-footer">
       <button onclick="closeAbout()">Tutup</button>
@@ -577,8 +533,6 @@ var client = null;
 var history_ = [];
 var MAX_HIST = 5000;
 var lastDataTime = 0;
-var refreshTimer = null;
-var currentRefreshMs = 5000;
 var lastData = null;
 var lastStatus = null;
 var fbDates = [];
@@ -593,6 +547,7 @@ function closeAbout(){
 }
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAbout(); });
 
+// ==================== REFRESH (MANUAL ONLY) ====================
 function doRefresh(){
   var btn = document.getElementById('btnRefresh');
   btn.classList.add('spinning');
@@ -785,12 +740,18 @@ function saveSetpoint(){
   var mn = parseFloat(document.getElementById('spMin').value);
   var mx = parseFloat(document.getElementById('spMax').value);
   var of = parseFloat(document.getElementById('spOff').value);
+  var fbInt = parseInt(document.getElementById('fbInterval').value);
+
   if (isNaN(mn) || isNaN(mx) || isNaN(of)) return showSpStatus('❌ Isi semua angka!', false);
   if (mn >= mx) return showSpStatus('❌ Batas bawah harus < batas atas', false);
   if (of >= mx) return showSpStatus('❌ Histeresis harus < batas atas', false);
   if (of <= mn) return showSpStatus('❌ Histeresis harus > batas bawah', false);
-  client.publish(TOPIC_CMD, JSON.stringify({setpoint: true, min: mn, max: mx, off: of}));
-  showSpStatus('✅ Setpoint terkirim: ' + mn + ' / ' + mx + ' / ' + of + '°C', true);
+
+  client.publish(TOPIC_CMD, JSON.stringify({
+    setpoint: true, min: mn, max: mx, off: of,
+    fbInterval: fbInt
+  }));
+  showSpStatus('✅ Tersimpan: SP ' + mn + '/' + mx + '/' + of + '°C | Firebase tiap ' + (fbInt/1000) + 's', true);
 }
 
 function loadSetpoint(){
@@ -798,8 +759,18 @@ function loadSetpoint(){
     if (lastStatus.spMin !== undefined) document.getElementById('spMin').value = lastStatus.spMin;
     if (lastStatus.spMax !== undefined) document.getElementById('spMax').value = lastStatus.spMax;
     if (lastStatus.spOff !== undefined) document.getElementById('spOff').value = lastStatus.spOff;
+    if (lastStatus.fbInt !== undefined) {
+      var sel = document.getElementById('fbInterval');
+      var val = String(lastStatus.fbInt);
+      // Cek apakah opsi ada
+      var found = false;
+      for (var i=0;i<sel.options.length;i++){
+        if (sel.options[i].value === val) { found = true; break; }
+      }
+      if (found) sel.value = val;
+    }
     updateSpDisplay();
-    showSpStatus('🔄 Setpoint dimuat dari ESP32', true);
+    showSpStatus('🔄 Dimuat dari ESP32', true);
   } else {
     showSpStatus('⚠️ Belum ada data dari ESP32', false);
   }
@@ -932,12 +903,6 @@ function setRelay(name, on){
   client.publish(TOPIC_CMD, JSON.stringify({relay: name, state: on}));
 }
 
-function setRefreshInterval(ms){
-  currentRefreshMs = parseInt(ms);
-  if (refreshTimer) clearInterval(refreshTimer);
-  refreshTimer = setInterval(doRefresh, currentRefreshMs);
-}
-
 function updateRackAnim(temp){
   var wrap = document.getElementById('rackWrap');
   if (!wrap) return;
@@ -1023,7 +988,6 @@ function toggleTheme(){applyTheme(!document.body.classList.contains('night'));}
 (function(){var s=localStorage.getItem('night');applyTheme(s==='1');})();
 
 connectMQTT();
-setRefreshInterval(5000);
 loadFirebaseDates();
 window.addEventListener('resize', drawChart);
 setInterval(updateDeviceStatus, 5000);
@@ -1031,7 +995,6 @@ setInterval(updateDeviceStatus, 5000);
 window.setMode = setMode;
 window.setRelay = setRelay;
 window.doRefresh = doRefresh;
-window.setRefreshInterval = setRefreshInterval;
 window.toggleTheme = toggleTheme;
 window.exportExcel = exportExcel;
 window.downloadToday = downloadToday;
