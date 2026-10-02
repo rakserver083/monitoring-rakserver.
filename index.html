@@ -13,17 +13,47 @@ body.night{--bg:#0b1220;--card:#131c2e;--text:#f1f5f9;--sub:#94a3b8;--accent:#3b
 body{background:var(--bg);color:var(--text);padding:18px;min-height:100vh;transition:background .3s,color .3s;}
 .wrap{max-width:1280px;margin:0 auto;}
 .header{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px 22px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;box-shadow:var(--shadow);margin-bottom:14px;}
-.logo{width:60px;height:60px;border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;transition:all .3s;font-size:1.9rem;line-height:1;}
-.logo.day{background:linear-gradient(135deg,#fb923c,#f59e0b);box-shadow:0 4px 12px rgba(245,158,11,.35);}
-.logo.night{background:linear-gradient(135deg,#3b82f6,#60a5fa);box-shadow:0 4px 12px rgba(59,130,246,.35);}
-.logo::after{content:'🌡️';display:inline-block;filter:drop-shadow(0 2px 4px rgba(0,0,0,.2));}
-.title-block{flex:1;min-width:200px;}
-.title-block h1{font-size:1.3rem;font-weight:800;letter-spacing:-.3px;}
+
+/* ============ LOGO POLINDRA ============ */
+.logo{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;transition:all .3s;background-size:80%;background-repeat:no-repeat;background-position:center;background-color:#fff;border:2px solid #1e3a8a;box-shadow:0 4px 12px rgba(30,58,138,.25);}
+.logo.day{background-image:url('logo-polindra.png');}
+.logo.night{background-image:url('logo-polindra.png');background-color:#f1f5f9;border-color:#60a5fa;box-shadow:0 4px 12px rgba(59,130,246,.35);}
+.logo::after{content:'';display:none;}
+
+.title-block{flex:1;min-width:200px;cursor:pointer;transition:transform .2s;border-radius:8px;padding:4px 8px;margin:-4px -8px;}
+.title-block:hover{background:var(--chip);transform:translateX(2px);}
+.title-block h1{font-size:1.3rem;font-weight:800;letter-spacing:-.3px;display:flex;align-items:center;gap:8px;}
+.title-block h1 .info-icon{font-size:1rem;color:var(--sub);opacity:.7;font-weight:500;}
+.title-block:hover h1 .info-icon{color:var(--accent);opacity:1;}
 .title-block .sub{font-size:.8rem;color:var(--sub);margin-top:2px;}
 .toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
-.toolbar button,.toolbar select{background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:999px;padding:8px 14px;font-size:.82rem;cursor:pointer;font-weight:500;}
+.toolbar button,.toolbar select{background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:999px;padding:8px 14px;font-size:.82rem;cursor:pointer;font-weight:500;transition:all .2s;}
 .toolbar button:hover{border-color:var(--accent);color:var(--accent);}
 .toolbar button.primary{background:var(--accent);color:#fff;border-color:var(--accent);}
+.toolbar button.spinning{opacity:.6;cursor:wait;}
+.toolbar button.spinning span{display:inline-block;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+.modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,.6);backdrop-filter:blur(4px);z-index:9999;display:none;align-items:center;justify-content:center;padding:20px;animation:fadeIn .2s;}
+.modal-overlay.show{display:flex;}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:20px;max-width:640px;width:100%;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3);animation:slideUp .3s;}
+@keyframes slideUp{from{transform:translateY(30px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+.modal-header{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:var(--card);z-index:1;}
+.modal-header h2{font-size:1.2rem;font-weight:800;display:flex;align-items:center;gap:10px;}
+.modal-close{width:36px;height:36px;border-radius:10px;border:1px solid var(--border);background:var(--chip);color:var(--text);cursor:pointer;font-size:1.2rem;font-weight:700;display:flex;align-items:center;justify-content:center;transition:all .2s;}
+.modal-close:hover{background:var(--hot);color:#fff;border-color:var(--hot);}
+.modal-body{padding:20px 24px;font-size:.88rem;line-height:1.7;color:var(--text);}
+.modal-body p{margin-bottom:12px;}
+.modal-body b{color:var(--text);font-weight:700;}
+.modal-body ul{list-style:none;padding-left:0;margin:8px 0 16px;}
+.modal-body ul li{padding:6px 0 6px 28px;position:relative;color:var(--sub);}
+.modal-body ul li::before{content:'✓';position:absolute;left:0;top:6px;color:var(--ok);font-weight:800;font-size:1rem;}
+.modal-body .chip{display:inline-block;background:var(--chip);padding:3px 10px;border-radius:6px;font-size:.8rem;font-family:'Courier New',monospace;color:var(--text);margin:2px 2px;border:1px solid var(--border);}
+.modal-body h3{font-size:.9rem;font-weight:700;margin:16px 0 8px;color:var(--text);}
+.modal-footer{padding:16px 24px;border-top:1px solid var(--border);text-align:right;}
+.modal-footer button{padding:10px 24px;border-radius:10px;border:0;background:var(--accent);color:#fff;font-weight:700;cursor:pointer;font-size:.85rem;}
+
 .statusbar{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px 20px;display:flex;gap:22px;flex-wrap:wrap;font-size:.85rem;margin-bottom:14px;}
 .statusbar .item{display:flex;align-items:center;gap:8px;color:var(--sub);}
 .statusbar .item b{color:var(--text);font-weight:600;}
@@ -72,7 +102,6 @@ body.night .visual .readout{background:rgba(30,41,59,.9);color:#f1f5f9;border-co
 .illus-wrap.active.cold-active{filter:drop-shadow(0 0 18px rgba(59,130,246,.7));}
 .peltier-fan-g{transform-origin:75px 75px;transform-box:view-box;}
 .illus-wrap.active .peltier-fan-g{animation:spin 1s linear infinite;}
-@keyframes spin{to{transform:rotate(360deg);}}
 .cold-mist,.cold-particle{opacity:0;}
 .illus-wrap.active .cold-mist{opacity:1;animation:mistRise 2.5s ease-out infinite;}
 .illus-wrap.active .cold-particle{opacity:1;animation:particleUp 2.2s linear infinite;}
@@ -123,11 +152,6 @@ footer{text-align:center;color:var(--sub);font-size:.75rem;padding:24px 0 8px;}
 .btn-sm.green{background:var(--ok);color:#fff;border-color:var(--ok);}
 .btn-sm.blue{background:var(--accent);color:#fff;border-color:var(--accent);}
 .btn-sm.red{background:var(--hot);color:#fff;border-color:var(--hot);}
-.about-section{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;box-shadow:var(--shadow);margin-bottom:18px;}
-.about-section h2{font-size:1rem;margin-bottom:12px;}
-.about-section p{font-size:.85rem;color:var(--sub);line-height:1.7;margin-bottom:8px;}
-.about-section ul{font-size:.85rem;color:var(--sub);line-height:1.8;padding-left:20px;}
-.about-section code{background:var(--chip);padding:2px 6px;border-radius:4px;font-size:.8rem;}
 .log-scroll{max-height:320px;overflow-y:auto;border:1px solid var(--border);border-radius:10px;}
 .loading{text-align:center;color:var(--sub);padding:20px;font-size:.85rem;}
 .spinner{display:inline-block;width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;vertical-align:middle;margin-right:6px;}
@@ -137,9 +161,9 @@ footer{text-align:center;color:var(--sub);font-size:.75rem;padding:24px 0 8px;}
 <div class="wrap">
   <div class="header">
     <div class="logo day" id="logo"></div>
-    <div class="title-block">
-      <h1>Monitoring Suhu Rak Server</h1>
-      <div class="sub">ESP32-S3 · MQTT + Firebase · WiFi Manager</div>
+    <div class="title-block" onclick="showAbout()" title="Klik untuk info proyek">
+      <h1>Monitoring Suhu Rak Server <span class="info-icon">ⓘ</span></h1>
+      <div class="sub">ESP32-S3 · MQTT + Firebase · Politeknik Negeri Indramayu</div>
     </div>
     <div class="toolbar">
       <select id="refreshSelect" onchange="setRefreshInterval(this.value)">
@@ -150,14 +174,14 @@ footer{text-align:center;color:var(--sub);font-size:.75rem;padding:24px 0 8px;}
         <option value="1800000">Update 30m</option>
         <option value="3600000">Update 1j</option>
       </select>
-      <button onclick="refreshNow()">🔄 Refresh</button>
+      <button id="btnRefresh" onclick="doRefresh()"><span id="refreshIcon">🔄</span> Refresh</button>
       <button class="primary" onclick="exportExcel()">📊 Excel</button>
       <button id="themeBtn" onclick="toggleTheme()">🌙 Malam</button>
     </div>
   </div>
 
   <div class="banner">
-    <b>ℹ️ Info:</b> Data disimpan langsung oleh <b>ESP32</b> ke Firebase setiap <b>10 detik</b> (24/7, walau web ditutup). Web hanya untuk tampilan & kontrol.
+    <b>ℹ️ Info:</b> Data disimpan langsung oleh <b>ESP32</b> ke Firebase setiap <b>10 detik</b> (24/7, walau web ditutup). Klik <b>judul</b> untuk info lengkap proyek.
   </div>
 
   <div class="statusbar">
@@ -419,7 +443,7 @@ footer{text-align:center;color:var(--sub);font-size:.75rem;padding:24px 0 8px;}
         <option value="100">100 titik</option>
         <option value="all">Semua data</option>
       </select>
-      <button class="btn-sm blue" onclick="refreshNow()">🔄 Refresh Grafik</button>
+      <button class="btn-sm blue" onclick="doRefresh()">🔄 Refresh Grafik</button>
     </div>
     <div class="chart-wrap"><canvas id="chart"></canvas></div>
     <div style="font-size:.75rem;color:var(--sub);" id="chartRange">Menunggu data...</div>
@@ -443,26 +467,86 @@ footer{text-align:center;color:var(--sub);font-size:.75rem;padding:24px 0 8px;}
     </div>
   </div>
 
-  <div class="about-section">
-    <h2>ℹ️ Tentang Proyek</h2>
-    <p><b>Monitoring Suhu Rak Server</b> adalah sistem monitoring & kontrol suhu rak server berbasis <b>ESP32-S3</b> dengan <b>MQTT</b> + <b>Firebase Realtime Database</b>.</p>
-    <p><b>Fitur:</b></p>
-    <ul>
-      <li>ESP32 kirim data <b>langsung ke Firebase</b> setiap 10 detik (24/7)</li>
-      <li>Monitoring real-time DHT22 + 2× DS18B20</li>
-      <li>Setpoint suhu editable dari web (tersimpan di EEPROM)</li>
-      <li>Kontrol otomatis Peltier dengan histeresis</li>
-      <li>Siklus exhaust fan otomatis (1 menit ON / 5 menit)</li>
-      <li>Mode Manual via MQTT</li>
-      <li>WiFi Manager (AP mode jika WiFi gagal)</li>
-      <li>Log permanen Firebase + export Excel per kolom</li>
-      <li>Grafik trend interaktif</li>
-    </ul>
-    <p><b>Hardware:</b> ESP32-S3 · DHT22 · 2× DS18B20 · 3× Relay · LCD I2C · 2× Peltier · Fan</p>
-    <p><b>MQTT:</b> <code>broker.hivemq.com</code> · Topic: <code>rak/server/rakserver/*</code></p>
-  </div>
+  <footer>ESP32-S3 · MQTT + Firebase · Politeknik Negeri Indramayu · © 2025</footer>
+</div>
 
-  <footer>ESP32-S3 · MQTT + Firebase · © 2025</footer>
+<div class="modal-overlay" id="aboutModal" onclick="if(event.target===this)closeAbout()">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>ℹ️ Tentang Proyek</h2>
+      <button class="modal-close" onclick="closeAbout()" title="Tutup">×</button>
+    </div>
+    <div class="modal-body">
+      <p><b>Monitoring Suhu Rak Server</b> adalah sistem monitoring & kontrol suhu rak server berbasis <b>ESP32-S3</b> dengan <b>MQTT</b> + <b>Firebase Realtime Database</b>. Proyek ini dikembangkan di <b>Politeknik Negeri Indramayu</b>.</p>
+
+      <h3>🎯 Fitur Utama</h3>
+      <ul>
+        <li>ESP32 kirim data <b>langsung ke Firebase</b> setiap 10 detik (24/7, walau web ditutup)</li>
+        <li>Monitoring real-time DHT22 + 2× DS18B20</li>
+        <li>Setpoint suhu editable dari web (tersimpan di EEPROM)</li>
+        <li>Kontrol otomatis Peltier dengan histeresis</li>
+        <li>Proteksi dingin (Peltier OFF jika suhu terlalu rendah)</li>
+        <li>Siklus exhaust fan otomatis (1 menit ON / 5 menit)</li>
+        <li>Mode Manual via MQTT</li>
+        <li>WiFi Manager (AP mode jika WiFi gagal)</li>
+        <li>Log permanen Firebase + export Excel per kolom</li>
+        <li>Grafik trend interaktif</li>
+        <li>Mode malam/siang</li>
+      </ul>
+
+      <h3>🔧 Hardware</h3>
+      <p>
+        <span class="chip">ESP32-S3</span>
+        <span class="chip">DHT22</span>
+        <span class="chip">2× DS18B20</span>
+        <span class="chip">3× Relay</span>
+        <span class="chip">LCD I2C 16×2</span>
+        <span class="chip">2× Peltier</span>
+        <span class="chip">Exhaust Fan</span>
+      </p>
+
+      <h3>📡 Protokol & Topic MQTT</h3>
+      <p>Broker: <span class="chip">broker.hivemq.com</span></p>
+      <p>Topic:</p>
+      <ul>
+        <li><span class="chip">rak/server/rakserver/data</span> — data sensor</li>
+        <li><span class="chip">rak/server/rakserver/status</span> — status relay & device</li>
+        <li><span class="chip">rak/server/rakserver/command</span> — kontrol dari web</li>
+        <li><span class="chip">rak/server/rakserver/online</span> — LWT online/offline</li>
+      </ul>
+
+      <h3>🔥 Firebase</h3>
+      <p>Project: <span class="chip">monitoring-rakserver</span></p>
+      <p>Path: <span class="chip">rak_logs_by_date/{tanggal}/{timestamp}</span></p>
+
+      <h3>⚙️ Setpoint Default</h3>
+      <ul>
+        <li>Batas Bawah: <b>18.0°C</b> (proteksi dingin)</li>
+        <li>Batas Atas: <b>28.0°C</b> (Peltier ON)</li>
+        <li>Histeresis: <b>22.5°C</b> (Peltier OFF)</li>
+      </ul>
+
+      <h3>🔄 Cara Kerja Kontrol Peltier</h3>
+      <ul>
+        <li>Suhu ≥ 28°C → Peltier <b>ON</b></li>
+        <li>Suhu ≤ 22.5°C → Peltier <b>OFF</b></li>
+        <li>Suhu antara 22.5-28°C → <b>tahan</b> state terakhir</li>
+        <li>Suhu &lt; 18°C → Peltier <b>OFF paksa</b> (proteksi)</li>
+      </ul>
+
+      <h3>🏫 Institusi</h3>
+      <p>Politeknik Negeri Indramayu</p>
+
+      <h3>🌐 URL Terkait</h3>
+      <p>
+        Web Dashboard: <span class="chip">monitoring-rakserver.vercel.app</span><br>
+        WiFi Manager: <span class="chip">http://&lt;IP_ESP32&gt;</span>
+      </p>
+    </div>
+    <div class="modal-footer">
+      <button onclick="closeAbout()">Tutup</button>
+    </div>
+  </div>
 </div>
 
 <script type="module">
@@ -498,6 +582,31 @@ var currentRefreshMs = 5000;
 var lastData = null;
 var lastStatus = null;
 var fbDates = [];
+
+function showAbout(){
+  document.getElementById('aboutModal').classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+function closeAbout(){
+  document.getElementById('aboutModal').classList.remove('show');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAbout(); });
+
+function doRefresh(){
+  var btn = document.getElementById('btnRefresh');
+  btn.classList.add('spinning');
+  setTimeout(() => btn.classList.remove('spinning'), 1000);
+
+  drawChart();
+  loadFirebaseDates();
+  if (lastData) document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('id-ID');
+  if (client && !client.connected) client.reconnect();
+
+  var original = btn.innerHTML;
+  btn.innerHTML = '<span>✅</span> Refreshed';
+  setTimeout(() => { btn.innerHTML = original; }, 1500);
+}
 
 function setFbStatus(text, ok){
   document.getElementById('fbStatus').textContent = text;
@@ -664,7 +773,6 @@ async function exportExcel(){
   }
 }
 
-// ==================== SETPOINT ====================
 function showSpStatus(msg, ok){
   var el = document.getElementById('spStatus');
   el.textContent = msg;
@@ -707,7 +815,6 @@ function updateSpDisplay(){
   }
 }
 
-// ==================== MQTT ====================
 function connectMQTT(){
   setMqttStatus('Menghubungkan...', false);
   client = mqtt.connect(MQTT_BROKER_WS, {
@@ -769,8 +876,6 @@ function handleDataMessage(d){
   if (history_.length > MAX_HIST) history_.shift();
 
   drawChart();
-
-  // NOTE: TIDAK ADA saveToFirebase() — ESP32 yang simpan
 }
 
 function handleStatusMessage(d){
@@ -780,11 +885,7 @@ function handleStatusMessage(d){
   document.getElementById('ip').textContent = d.ip;
   document.getElementById('serverTime').textContent = d.serverTime || '--';
 
-  // Status FB dari ESP32
-  if (d.fb !== undefined) {
-    setFbStatus(d.fb ? 'ESP32 OK' : 'ESP32 NO', !!d.fb);
-  }
-
+  if (d.fb !== undefined) setFbStatus(d.fb ? 'ESP32 OK' : 'ESP32 NO', !!d.fb);
   updateSpDisplay();
 
   var grid = document.getElementById('manualGrid');
@@ -834,11 +935,7 @@ function setRelay(name, on){
 function setRefreshInterval(ms){
   currentRefreshMs = parseInt(ms);
   if (refreshTimer) clearInterval(refreshTimer);
-  refreshTimer = setInterval(refreshNow, currentRefreshMs);
-}
-function refreshNow(){
-  drawChart();
-  if (lastData) document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('id-ID');
+  refreshTimer = setInterval(doRefresh, currentRefreshMs);
 }
 
 function updateRackAnim(temp){
@@ -933,7 +1030,7 @@ setInterval(updateDeviceStatus, 5000);
 
 window.setMode = setMode;
 window.setRelay = setRelay;
-window.refreshNow = refreshNow;
+window.doRefresh = doRefresh;
 window.setRefreshInterval = setRefreshInterval;
 window.toggleTheme = toggleTheme;
 window.exportExcel = exportExcel;
@@ -945,6 +1042,8 @@ window.clearAllLogs = clearAllLogs;
 window.loadFirebaseDates = loadFirebaseDates;
 window.saveSetpoint = saveSetpoint;
 window.loadSetpoint = loadSetpoint;
+window.showAbout = showAbout;
+window.closeAbout = closeAbout;
 </script>
 </body>
 </html>
