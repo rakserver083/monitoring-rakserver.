@@ -535,76 +535,6 @@ var lastData = null;
 var lastStatus = null;
 var fbDates = [];
 
-/* ============================================================
-   PARSE KEY FIREBASE: "1791132096_195"
-   Format: <epoch_detik>_<suhu×10>
-   → ts = 1791132096 (detik), tRak = 19.5
-   ============================================================ */
-function parseFirebaseKey(key){
-  var m = String(key).match(/^(\d+)_(\d+)$/);
-  if (!m) return null;
-  var epochSec = parseInt(m[1], 10);
-  var rawTemp  = parseInt(m[2], 10);
-  var tRak = rawTemp / 10;
-  return {
-    ts: epochSec,
-    tsMs: epochSec * 1000,
-    t: new Date(epochSec * 1000).toISOString(),
-    tRak: tRak,
-    key: key
-  };
-}
-
-function dateKeyFromTs(tsSec){
-  var d = new Date(tsSec * 1000);
-  var pad = n => String(n).padStart(2, '0');
-  return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate());
-}
-
-/* Ambil item dari node (kalau punya field lengkap) */
-function buildItemFromNode(key, val){
-  var parsed = parseFirebaseKey(key);
-  if (!parsed) return null;
-
-  var item = {
-    ts: parsed.tsMs,
-    t: parsed.t,
-    tRak: parsed.tRak,
-    rh: NaN,
-    tPel1: NaN,
-    tPel2: NaN,
-    peltier: false,
-    fan: false,
-    mode: false,
-    _key: key
-  };
-
-  // Kalau node punya field tambahan, pakai
-  if (val && typeof val === 'object'){
-    if (val.ts !== undefined){
-      var rawTs = Number(val.ts);
-      if (!isNaN(rawTs)){
-        var tsMs = rawTs < 1e12 ? rawTs * 1000 : rawTs;
-        item.ts = tsMs;
-        item.t = new Date(tsMs).toISOString();
-      }
-    }
-    if (val.t !== undefined && typeof val.t === 'string'){
-      var p = Date.parse(val.t);
-      if (!isNaN(p)){ item.ts = p; item.t = val.t; }
-    }
-    if (val.tRak !== undefined) item.tRak = Number(val.tRak);
-    if (val.suhu !== undefined) item.tRak = Number(val.suhu);
-    if (val.rh !== undefined) item.rh = Number(val.rh);
-    if (val.tPel1 !== undefined) item.tPel1 = Number(val.tPel1);
-    if (val.tPel2 !== undefined) item.tPel2 = Number(val.tPel2);
-    if (val.peltier !== undefined) item.peltier = !!val.peltier;
-    if (val.fan !== undefined) item.fan = !!val.fan;
-    if (val.mode !== undefined) item.mode = !!val.mode;
-  }
-  return item;
-}
-
 function showAbout(){
   document.getElementById('aboutModal').classList.add('show');
   document.body.style.overflow = 'hidden';
@@ -615,14 +545,17 @@ function closeAbout(){
 }
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAbout(); });
 
+// ==================== REFRESH (MANUAL ONLY) ====================
 function doRefresh(){
   var btn = document.getElementById('btnRefresh');
   btn.classList.add('spinning');
   setTimeout(() => btn.classList.remove('spinning'), 1000);
+
   drawChart();
   loadFirebaseDates();
   if (lastData) document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('id-ID');
   if (client && !client.connected) client.reconnect();
+
   var original = btn.innerHTML;
   btn.innerHTML = '<span>✅</span> Refreshed';
   setTimeout(() => { btn.innerHTML = original; }, 1500);
@@ -633,10 +566,7 @@ function setFbStatus(text, ok){
   document.getElementById('fbDot').className = 'dot fb ' + (ok ? 'on' : 'off');
 }
 
-/* ============================================================
-   LOAD FIREBASE — GROUP BY TANGGAL
-   Struktur: rak_logs_by_date/<epoch>_<suhu×10> = ...
-   ============================================================ */
+// ==================== LOAD FIREBASE (TANPA FILTER 0) ====================
 async function loadFirebaseDates(){
   var tbody = document.getElementById('logBody');
   tbody.innerHTML = '<tr><td colspan="6" class="loading"><span class="spinner"></span>Memuat data Firebase...</td></tr>';
@@ -648,32 +578,17 @@ async function loadFirebaseDates(){
       setFbStatus('Terhubung', true);
       return;
     }
-
-    var groups = {};
-    snap.forEach(function(child){
-      var item = buildItemFromNode(child.key, child.val());
-      if (!item) return;
-      var dk = dateKeyFromTs(Math.floor(item.ts / 1000));
-      if (!groups[dk]) groups[dk] = [];
-      groups[dk].push(item);
+    fbDates = [];
+    snap.forEach(child => {
+      var items = [];
+      child.forEach(gc => items.push(gc.val()));
+      items.sort((a,b) => a.ts - b.ts);
+      // FILTER 0 DIHAPUS - semua data ditampilkan
+      if (items.length > 0) fbDates.push({ date: child.key, items: items });
     });
-
-    fbDates = Object.keys(groups).map(function(dk){
-      var items = groups[dk].sort(function(a,b){ return a.ts - b.ts; });
-      return { date: dk, items: items };
-    });
-    fbDates.sort(function(a,b){ return b.date.localeCompare(a.date); });
-
+    fbDates.sort((a,b) => b.date.localeCompare(a.date));
     renderLogTable();
     setFbStatus('Terhubung', true);
-
-    var total = 0;
-    console.log('[FB] Total tanggal:', fbDates.length);
-    fbDates.forEach(function(g){
-      total += g.items.length;
-      console.log('  📅 ' + g.date + ' → ' + g.items.length + ' titik');
-    });
-    console.log('[FB] Total titik:', total);
   } catch(e){
     console.error('[FB] load error:', e);
     tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--hot);padding:20px;">Gagal: ' + e.message + '</td></tr>';
@@ -689,15 +604,14 @@ function renderLogTable(){
   }
   var html = '', totalPoints = 0;
   fbDates.forEach(function(g){
-    var temps = g.items.map(function(x){ return Number(x.tRak); })
-                       .filter(function(v){ return !isNaN(v); });
-    var avg = temps.length ? temps.reduce(function(a,b){ return a+b; }, 0) / temps.length : 0;
-    var start = g.items[0] ? new Date(g.items[0].t).toLocaleTimeString('id-ID') : '--';
-    var end   = g.items[g.items.length-1] ? new Date(g.items[g.items.length-1].t).toLocaleTimeString('id-ID') : '--';
+    var temps = g.items.map(x => Number(x.tRak));
+    var avg = temps.reduce((a,b) => a+b, 0) / temps.length;
+    var start = new Date(g.items[0].t).toLocaleTimeString('id-ID');
+    var end = new Date(g.items[g.items.length-1].t).toLocaleTimeString('id-ID');
     totalPoints += g.items.length;
     html += '<tr>';
     html += '<td><b>' + g.date + '</b></td>';
-    html += '<td><b>' + g.items.length + '</b> titik</td>';
+    html += '<td>' + g.items.length + ' titik</td>';
     html += '<td>' + start + '</td>';
     html += '<td>' + end + '</td>';
     html += '<td>' + avg.toFixed(1) + '°C</td>';
@@ -711,20 +625,8 @@ function renderLogTable(){
 
 async function deleteDate(dateKey){
   if (!confirm('Hapus log tanggal ' + dateKey + '?')) return;
-  try {
-    const snap = await get(ref(db, 'rak_logs_by_date'));
-    var keysToDelete = [];
-    snap.forEach(function(child){
-      var parsed = parseFirebaseKey(child.key);
-      if (parsed && dateKeyFromTs(parsed.ts) === dateKey){
-        keysToDelete.push(child.key);
-      }
-    });
-    for (var i=0;i<keysToDelete.length;i++){
-      await remove(ref(db, 'rak_logs_by_date/' + keysToDelete[i]));
-    }
-    await loadFirebaseDates();
-  } catch(e){ alert('Gagal: ' + e.message); }
+  try { await remove(ref(db, 'rak_logs_by_date/' + dateKey)); await loadFirebaseDates(); }
+  catch(e){ alert('Gagal: ' + e.message); }
 }
 
 async function clearAllLogs(){
@@ -737,27 +639,26 @@ async function clearAllLogs(){
 }
 
 function fmtTime(iso){
-  if (!iso) return '--';
   const d = new Date(iso);
-  if (isNaN(d.getTime())) return '--';
   const pad = n => String(n).padStart(2,'0');
   return pad(d.getDate()) + '/' + pad(d.getMonth()+1) + '/' + d.getFullYear()
     + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
 }
 
+// ==================== EXPORT EXCEL (TANPA FILTER 0) ====================
 function exportItemsToExcel(items, filename){
   if (!items || items.length === 0) return alert('Tidak ada data');
   var wsData = [
     ['Waktu', 'Suhu Rak (°C)', 'Kelembapan (%)', 'Peltier 1 (°C)', 'Peltier 2 (°C)',
      'Peltier (Relay)', 'Fan (Relay)', 'Mode']
   ];
-  items.forEach(function(x){
+  items.forEach(x => {
     wsData.push([
       fmtTime(x.t),
-      isNaN(x.tRak) ? '' : parseFloat(Number(x.tRak).toFixed(1)),
-      isNaN(x.rh)   ? '' : parseFloat(Number(x.rh).toFixed(0)),
-      isNaN(x.tPel1)? '' : parseFloat(Number(x.tPel1).toFixed(1)),
-      isNaN(x.tPel2)? '' : parseFloat(Number(x.tPel2).toFixed(1)),
+      parseFloat(Number(x.tRak).toFixed(1)),
+      parseFloat(Number(x.rh).toFixed(0)),
+      parseFloat(Number(x.tPel1).toFixed(1)),
+      parseFloat(Number(x.tPel2).toFixed(1)),
       x.peltier ? 'ON' : 'OFF',
       x.fan ? 'ON' : 'OFF',
       x.mode ? 'MANUAL' : 'AUTO'
@@ -768,14 +669,25 @@ function exportItemsToExcel(items, filename){
     { wch: 22 }, { wch: 14 }, { wch: 16 }, { wch: 14 },
     { wch: 14 }, { wch: 15 }, { wch: 12 }, { wch: 10 }
   ];
+  var range = XLSX.utils.decode_range(ws['!ref']);
+  for (var R = 1; R <= range.e.r; R++) {
+    for (var C = 1; C <= 4; C++) {
+      var addr = XLSX.utils.encode_cell({r:R, c:C});
+      if (ws[addr]) {
+        ws[addr].t = 'n';
+        ws[addr].v = Number(ws[addr].v);
+        ws[addr].z = '0.0';
+      }
+    }
+  }
   var wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'Log Rak Server');
   XLSX.writeFile(wb, filename + '.xlsx');
 }
 
 function downloadDate(dateKey){
-  var g = fbDates.find(function(x){ return x.date === dateKey; });
-  if (!g || g.items.length === 0) return alert('Tidak ada data untuk ' + dateKey);
+  var g = fbDates.find(x => x.date === dateKey);
+  if (!g || g.items.length === 0) return alert('Tidak ada data');
   exportItemsToExcel(g.items, 'Log_RakServer_' + dateKey);
 }
 
@@ -784,31 +696,32 @@ function downloadToday(){
   downloadDate(today);
 }
 
-async function collectAllItems(){
-  const snap = await get(ref(db, 'rak_logs_by_date'));
-  if (!snap.exists()) return [];
-  var arr = [];
-  snap.forEach(function(child){
-    var item = buildItemFromNode(child.key, child.val());
-    if (item) arr.push(item);
-  });
-  arr.sort(function(a,b){ return a.ts - b.ts; });
-  return arr;
-}
-
+// ==================== DOWNLOAD ALL (TANPA FILTER 0) ====================
 async function downloadAll(){
   try {
-    var arr = await collectAllItems();
+    const snap = await get(ref(db, 'rak_logs_by_date'));
+    if (!snap.exists()) return alert('Belum ada data');
+    var arr = [];
+    snap.forEach(dateNode => { dateNode.forEach(item => arr.push(item.val())); });
+    arr.sort((a,b) => a.ts - b.ts);
+    // FILTER 0 DIHAPUS
     if (arr.length === 0) return alert('Belum ada data');
     exportItemsToExcel(arr, 'Log_RakServer_Semua');
     alert('✅ Download ' + arr.length + ' baris data');
   } catch(e){ alert('Gagal: ' + e.message); }
 }
 
+// ==================== EXPORT EXCEL (TANPA FILTER 0) ====================
 async function exportExcel(){
   try {
-    var arr = await collectAllItems();
-    if (arr.length === 0) return alert('Belum ada data di Firebase');
+    const snap = await get(ref(db, 'rak_logs_by_date'));
+    if (!snap.exists()) return alert('Belum ada data di Firebase');
+    var arr = [];
+    snap.forEach(dateNode => { dateNode.forEach(item => arr.push(item.val())); });
+    if (arr.length === 0) return alert('Belum ada data');
+    arr.sort((a,b) => a.ts - b.ts);
+    // FILTER 0 DIHAPUS
+    if (arr.length === 0) return alert('Belum ada data');
     exportItemsToExcel(arr, 'Log_RakServer_' + new Date().toISOString().slice(0,10));
     alert('✅ Export berhasil: ' + arr.length + ' baris');
   } catch(e){
@@ -830,12 +743,15 @@ function saveSetpoint(){
   var mx = parseFloat(document.getElementById('spMax').value);
   var of = parseFloat(document.getElementById('spOff').value);
   var fbInt = parseInt(document.getElementById('fbInterval').value);
+
   if (isNaN(mn) || isNaN(mx) || isNaN(of)) return showSpStatus('❌ Isi semua angka!', false);
   if (mn >= mx) return showSpStatus('❌ Batas bawah harus < batas atas', false);
   if (of >= mx) return showSpStatus('❌ Histeresis harus < batas atas', false);
   if (of <= mn) return showSpStatus('❌ Histeresis harus > batas bawah', false);
+
   client.publish(TOPIC_CMD, JSON.stringify({
-    setpoint: true, min: mn, max: mx, off: of, fbInterval: fbInt
+    setpoint: true, min: mn, max: mx, off: of,
+    fbInterval: fbInt
   }));
   showSpStatus('✅ Tersimpan: SP ' + mn + '/' + mx + '/' + of + '°C | Firebase tiap ' + (fbInt/1000) + 's', true);
 }
@@ -930,6 +846,7 @@ function handleDataMessage(d){
 
   history_.push({ time: new Date().toISOString(), tRak: d.tRak, rh: d.rh, tPel1: d.tPel1, tPel2: d.tPel2 });
   if (history_.length > MAX_HIST) history_.shift();
+
   drawChart();
 }
 
@@ -939,6 +856,7 @@ function handleStatusMessage(d){
   document.getElementById('heap').textContent = (d.heap/1024).toFixed(1) + ' KB';
   document.getElementById('ip').textContent = d.ip;
   document.getElementById('serverTime').textContent = d.serverTime || '--';
+
   if (d.fb !== undefined) setFbStatus(d.fb ? 'ESP32 OK' : 'ESP32 NO', !!d.fb);
   updateSpDisplay();
 
