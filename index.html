@@ -30,7 +30,6 @@ body{background:var(--bg);color:var(--text);padding:18px;min-height:100vh;transi
 .toolbar button.spinning{opacity:.6;cursor:wait;}
 .toolbar button.spinning span{display:inline-block;animation:spin .8s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
-
 .modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,.6);backdrop-filter:blur(4px);z-index:9999;display:none;align-items:center;justify-content:center;padding:20px;animation:fadeIn .2s;}
 .modal-overlay.show{display:flex;}
 @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
@@ -49,7 +48,6 @@ body{background:var(--bg);color:var(--text);padding:18px;min-height:100vh;transi
 .modal-body h3{font-size:.9rem;font-weight:700;margin:16px 0 8px;color:var(--text);}
 .modal-footer{padding:16px 24px;border-top:1px solid var(--border);text-align:right;}
 .modal-footer button{padding:10px 24px;border-radius:10px;border:0;background:var(--accent);color:#fff;font-weight:700;cursor:pointer;font-size:.85rem;}
-
 .statusbar{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px 20px;display:flex;gap:22px;flex-wrap:wrap;font-size:.85rem;margin-bottom:14px;}
 .statusbar .item{display:flex;align-items:center;gap:8px;color:var(--sub);}
 .statusbar .item b{color:var(--text);font-weight:600;}
@@ -568,6 +566,7 @@ function setFbStatus(text, ok){
   document.getElementById('fbDot').className = 'dot fb ' + (ok ? 'on' : 'off');
 }
 
+// ==================== LOAD FIREBASE (TANPA FILTER 0) ====================
 async function loadFirebaseDates(){
   var tbody = document.getElementById('logBody');
   tbody.innerHTML = '<tr><td colspan="6" class="loading"><span class="spinner"></span>Memuat data Firebase...</td></tr>';
@@ -584,7 +583,7 @@ async function loadFirebaseDates(){
       var items = [];
       child.forEach(gc => items.push(gc.val()));
       items.sort((a,b) => a.ts - b.ts);
-      items = items.filter(x => !(Number(x.tRak) === 0 && Number(x.rh) === 0 && Number(x.tPel1) === 0 && Number(x.tPel2) === 0));
+      // FILTER 0 DIHAPUS - semua data ditampilkan
       if (items.length > 0) fbDates.push({ date: child.key, items: items });
     });
     fbDates.sort((a,b) => b.date.localeCompare(a.date));
@@ -646,6 +645,7 @@ function fmtTime(iso){
     + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
 }
 
+// ==================== EXPORT EXCEL (TANPA FILTER 0) ====================
 function exportItemsToExcel(items, filename){
   if (!items || items.length === 0) return alert('Tidak ada data');
   var wsData = [
@@ -696,6 +696,7 @@ function downloadToday(){
   downloadDate(today);
 }
 
+// ==================== DOWNLOAD ALL (TANPA FILTER 0) ====================
 async function downloadAll(){
   try {
     const snap = await get(ref(db, 'rak_logs_by_date'));
@@ -703,13 +704,14 @@ async function downloadAll(){
     var arr = [];
     snap.forEach(dateNode => { dateNode.forEach(item => arr.push(item.val())); });
     arr.sort((a,b) => a.ts - b.ts);
-    arr = arr.filter(x => !(Number(x.tRak) === 0 && Number(x.rh) === 0 && Number(x.tPel1) === 0 && Number(x.tPel2) === 0));
-    if (arr.length === 0) return alert('Semua data kosong (0)');
+    // FILTER 0 DIHAPUS
+    if (arr.length === 0) return alert('Belum ada data');
     exportItemsToExcel(arr, 'Log_RakServer_Semua');
     alert('✅ Download ' + arr.length + ' baris data');
   } catch(e){ alert('Gagal: ' + e.message); }
 }
 
+// ==================== EXPORT EXCEL (TANPA FILTER 0) ====================
 async function exportExcel(){
   try {
     const snap = await get(ref(db, 'rak_logs_by_date'));
@@ -718,8 +720,8 @@ async function exportExcel(){
     snap.forEach(dateNode => { dateNode.forEach(item => arr.push(item.val())); });
     if (arr.length === 0) return alert('Belum ada data');
     arr.sort((a,b) => a.ts - b.ts);
-    arr = arr.filter(x => !(Number(x.tRak) === 0 && Number(x.rh) === 0 && Number(x.tPel1) === 0 && Number(x.tPel2) === 0));
-    if (arr.length === 0) return alert('Semua data kosong (0)');
+    // FILTER 0 DIHAPUS
+    if (arr.length === 0) return alert('Belum ada data');
     exportItemsToExcel(arr, 'Log_RakServer_' + new Date().toISOString().slice(0,10));
     alert('✅ Export berhasil: ' + arr.length + ' baris');
   } catch(e){
@@ -762,7 +764,6 @@ function loadSetpoint(){
     if (lastStatus.fbInt !== undefined) {
       var sel = document.getElementById('fbInterval');
       var val = String(lastStatus.fbInt);
-      // Cek apakah opsi ada
       var found = false;
       for (var i=0;i<sel.options.length;i++){
         if (sel.options[i].value === val) { found = true; break; }
