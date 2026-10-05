@@ -13,44 +13,37 @@ body.night{--bg:#0b1220;--card:#131c2e;--text:#f1f5f9;--sub:#94a3b8;--accent:#3b
 body{background:var(--bg);color:var(--text);padding:18px;min-height:100vh;transition:background .3s,color .3s;}
 .wrap{max-width:1280px;margin:0 auto;}
 .header{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px 22px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;box-shadow:var(--shadow);margin-bottom:14px;}
-.logo{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;transition:all .3s;background-size:80%;background-repeat:no-repeat;background-position:center;background-color:#fff;border:2px solid #1e3a8a;box-shadow:0 4px 12px rgba(30,58,138,.25);}
-.logo.day{background-image:url('logo-polindra.png');}
-.logo.night{background-image:url('logo-polindra.png');background-color:#f1f5f9;border-color:#60a5fa;box-shadow:0 4px 12px rgba(59,130,246,.35);}
-.logo::after{content:'';display:none;}
-.title-block{flex:1;min-width:200px;cursor:pointer;transition:transform .2s;border-radius:8px;padding:4px 8px;margin:-4px -8px;}
-.title-block:hover{background:var(--chip);transform:translateX(2px);}
-.title-block h1{font-size:1.3rem;font-weight:800;letter-spacing:-.3px;display:flex;align-items:center;gap:8px;}
-.title-block h1 .info-icon{font-size:1rem;color:var(--sub);opacity:.7;font-weight:500;}
-.title-block:hover h1 .info-icon{color:var(--accent);opacity:1;}
+.logo{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;background-size:80%;background-repeat:no-repeat;background-position:center;background-color:#fff;border:2px solid #1e3a8a;box-shadow:0 4px 12px rgba(30,58,138,.25);}
+.logo.day,.logo.night{background-image:url('logo-polindra.png');}
+.logo.night{background-color:#f1f5f9;border-color:#60a5fa;}
+.title-block{flex:1;min-width:200px;cursor:pointer;padding:4px 8px;margin:-4px -8px;}
+.title-block:hover{background:var(--chip);}
+.title-block h1{font-size:1.3rem;font-weight:800;display:flex;align-items:center;gap:8px;}
+.title-block h1 .info-icon{font-size:1rem;color:var(--sub);}
 .title-block .sub{font-size:.8rem;color:var(--sub);margin-top:2px;}
 .toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
-.toolbar button,.toolbar select{background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:999px;padding:8px 14px;font-size:.82rem;cursor:pointer;font-weight:500;transition:all .2s;}
+.toolbar button,.toolbar select{background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:999px;padding:8px 14px;font-size:.82rem;cursor:pointer;font-weight:500;}
 .toolbar button:hover{border-color:var(--accent);color:var(--accent);}
 .toolbar button.primary{background:var(--accent);color:#fff;border-color:var(--accent);}
 .toolbar button.spinning{opacity:.6;cursor:wait;}
-.toolbar button.spinning span{display:inline-block;animation:spin .8s linear infinite;}
-@keyframes spin{to{transform:rotate(360deg);}}
-.modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,.6);backdrop-filter:blur(4px);z-index:9999;display:none;align-items:center;justify-content:center;padding:20px;animation:fadeIn .2s;}
+.modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,.6);backdrop-filter:blur(4px);z-index:9999;display:none;align-items:center;justify-content:center;padding:20px;}
 .modal-overlay.show{display:flex;}
-@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
-.modal{background:var(--card);border:1px solid var(--border);border-radius:20px;max-width:640px;width:100%;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3);animation:slideUp .3s;}
-@keyframes slideUp{from{transform:translateY(30px);opacity:0;}to{transform:translateY(0);opacity:1;}}
-.modal-header{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:var(--card);z-index:1;}
-.modal-header h2{font-size:1.2rem;font-weight:800;display:flex;align-items:center;gap:10px;}
-.modal-close{width:36px;height:36px;border-radius:10px;border:1px solid var(--border);background:var(--chip);color:var(--text);cursor:pointer;font-size:1.2rem;font-weight:700;display:flex;align-items:center;justify-content:center;transition:all .2s;}
-.modal-close:hover{background:var(--hot);color:#fff;border-color:var(--hot);}
-.modal-body{padding:20px 24px;font-size:.88rem;line-height:1.7;color:var(--text);}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:20px;max-width:640px;width:100%;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3);}
+.modal-header{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:var(--card);}
+.modal-header h2{font-size:1.2rem;font-weight:800;}
+.modal-close{width:36px;height:36px;border-radius:10px;border:1px solid var(--border);background:var(--chip);color:var(--text);cursor:pointer;font-size:1.2rem;font-weight:700;}
+.modal-body{padding:20px 24px;font-size:.88rem;line-height:1.7;}
 .modal-body p{margin-bottom:12px;}
 .modal-body ul{list-style:none;padding-left:0;margin:8px 0 16px;}
 .modal-body ul li{padding:6px 0 6px 28px;position:relative;color:var(--sub);}
-.modal-body ul li::before{content:'✓';position:absolute;left:0;top:6px;color:var(--ok);font-weight:800;font-size:1rem;}
-.modal-body .chip{display:inline-block;background:var(--chip);padding:3px 10px;border-radius:6px;font-size:.8rem;font-family:'Courier New',monospace;color:var(--text);margin:2px 2px;border:1px solid var(--border);}
-.modal-body h3{font-size:.9rem;font-weight:700;margin:16px 0 8px;color:var(--text);}
+.modal-body ul li::before{content:'✓';position:absolute;left:0;color:var(--ok);font-weight:800;}
+.modal-body h3{font-size:.9rem;margin:16px 0 8px;}
+.modal-body .chip{display:inline-block;background:var(--chip);padding:3px 10px;border-radius:6px;font-size:.8rem;font-family:monospace;color:var(--text);margin:2px;border:1px solid var(--border);}
 .modal-footer{padding:16px 24px;border-top:1px solid var(--border);text-align:right;}
-.modal-footer button{padding:10px 24px;border-radius:10px;border:0;background:var(--accent);color:#fff;font-weight:700;cursor:pointer;font-size:.85rem;}
+.modal-footer button{padding:10px 24px;border-radius:10px;border:0;background:var(--accent);color:#fff;font-weight:700;cursor:pointer;}
 .statusbar{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px 20px;display:flex;gap:22px;flex-wrap:wrap;font-size:.85rem;margin-bottom:14px;}
 .statusbar .item{display:flex;align-items:center;gap:8px;color:var(--sub);}
-.statusbar .item b{color:var(--text);font-weight:600;}
+.statusbar .item b{color:var(--text);}
 .dot{width:8px;height:8px;border-radius:50%;background:#94a3b8;display:inline-block;}
 .dot.on{background:var(--ok);animation:pulse 1.6s infinite;}
 .dot.off{background:var(--hot);}
@@ -59,19 +52,17 @@ body{background:var(--bg);color:var(--text);padding:18px;min-height:100vh;transi
 @keyframes pulse{0%,100%{box-shadow:0 0 0 3px rgba(16,185,129,.2);}50%{box-shadow:0 0 0 6px rgba(16,185,129,0);}}
 .banner{background:linear-gradient(135deg,rgba(13,110,253,.08),rgba(20,184,166,.08));border:1px solid var(--border);border-left:4px solid var(--accent);border-radius:12px;padding:14px 18px;font-size:.85rem;margin-bottom:14px;}
 .banner b{color:var(--accent);}
-.setpoint-card{background:var(--card);border:1px solid var(--border);border-left:4px solid var(--accent);border-radius:16px;padding:18px 20px;box-shadow:var(--shadow);margin-bottom:18px;}
-.setpoint-card h2{font-size:1rem;font-weight:700;margin-bottom:12px;color:var(--text);display:flex;align-items:center;gap:8px;}
+.setpoint-card,.mode-section{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px 20px;box-shadow:var(--shadow);margin-bottom:18px;}
+.setpoint-card{border-left:4px solid var(--accent);}
+.setpoint-card h2,.mode-section h2{font-size:1rem;font-weight:700;margin-bottom:12px;}
 .sp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:14px;}
 .sp-item{background:var(--chip);border:1px solid var(--border);border-radius:12px;padding:12px;}
-.sp-item label{display:block;font-size:.72rem;font-weight:700;color:var(--sub);text-transform:uppercase;margin-bottom:6px;letter-spacing:.3px;}
-.sp-item input,.sp-item select{width:100%;padding:10px;border:2px solid var(--border);border-radius:8px;font-size:1rem;font-weight:800;text-align:center;color:var(--text);background:var(--card);transition:border-color .2s,box-shadow .2s;}
-.sp-item input:focus,.sp-item select:focus{outline:0;border-color:var(--accent);box-shadow:0 0 0 3px rgba(13,110,253,.15);}
+.sp-item label{display:block;font-size:.72rem;font-weight:700;color:var(--sub);text-transform:uppercase;margin-bottom:6px;}
+.sp-item input,.sp-item select{width:100%;padding:10px;border:2px solid var(--border);border-radius:8px;font-size:1rem;font-weight:800;text-align:center;color:var(--text);background:var(--card);}
 .sp-item .hint{font-size:.65rem;color:var(--sub);margin-top:4px;line-height:1.4;}
 .sp-actions{display:flex;gap:8px;flex-wrap:wrap;}
-.sp-actions button{padding:10px 20px;border-radius:10px;border:0;font-weight:700;font-size:.85rem;cursor:pointer;transition:opacity .2s,transform .1s;}
-.sp-actions button:hover{opacity:.9;}
-.sp-actions button:active{transform:scale(.98);}
-.sp-actions button.save{background:var(--accent);color:#fff;box-shadow:0 4px 10px rgba(13,110,253,.3);}
+.sp-actions button{padding:10px 20px;border-radius:10px;border:0;font-weight:700;font-size:.85rem;cursor:pointer;}
+.sp-actions button.save{background:var(--accent);color:#fff;}
 .sp-actions button.reset{background:var(--chip);color:var(--text);border:1px solid var(--border);}
 .sp-status{font-size:.75rem;margin-top:10px;padding:8px 12px;border-radius:8px;background:var(--chip);color:var(--sub);display:none;}
 .sp-status.show{display:block;}
@@ -85,8 +76,8 @@ body{background:var(--bg);color:var(--text);padding:18px;min-height:100vh;transi
 .sensor-head .badge{background:var(--chip);border-radius:999px;padding:4px 12px;font-size:.75rem;color:var(--sub);font-weight:600;}
 .visual{height:220px;border-radius:12px;overflow:hidden;position:relative;background:linear-gradient(180deg,#dbeafe,#f0f9ff);margin-bottom:14px;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;}
 body.night .visual{background:linear-gradient(180deg,#0f172a,#1e293b);}
-.visual .readout{position:absolute;top:8px;left:50%;transform:translateX(-50%);font-size:1.5rem;font-weight:800;color:#0f172a;z-index:10;background:rgba(255,255,255,0.9);padding:4px 16px;border-radius:999px;border:2px solid rgba(13,110,253,.3);box-shadow:0 3px 10px rgba(0,0,0,.12);}
-body.night .visual .readout{background:rgba(30,41,59,.9);color:#f1f5f9;border-color:rgba(59,130,246,.5);}
+.visual .readout{position:absolute;top:8px;left:50%;transform:translateX(-50%);font-size:1.5rem;font-weight:800;color:#0f172a;z-index:10;background:rgba(255,255,255,.9);padding:4px 16px;border-radius:999px;border:2px solid rgba(13,110,253,.3);}
+body.night .visual .readout{background:rgba(30,41,59,.9);color:#f1f5f9;}
 .visual .readout .u{font-size:.85rem;color:#475569;margin-left:2px;font-weight:600;}
 .illus-wrap{position:relative;width:150px;height:190px;}
 .illus-wrap svg{width:100%;height:100%;display:block;}
@@ -99,26 +90,26 @@ body.night .visual .readout{background:rgba(30,41,59,.9);color:#f1f5f9;border-co
 .cold-mist,.cold-particle{opacity:0;}
 .illus-wrap.active .cold-mist{opacity:1;animation:mistRise 2.5s ease-out infinite;}
 .illus-wrap.active .cold-particle{opacity:1;animation:particleUp 2.2s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
 @keyframes mistRise{0%{opacity:0;transform:translateY(6px);}20%{opacity:.75;}100%{opacity:0;transform:translateY(-22px);}}
 @keyframes particleUp{0%{opacity:0;transform:translate(0,0) scale(.6);}15%{opacity:1;}100%{opacity:0;transform:translate(-10px,-42px) scale(.4);}}
 .stats{display:flex;justify-content:space-between;gap:8px;font-size:.78rem;}
 .stats .st{flex:1;text-align:center;padding:8px 4px;border-radius:10px;background:var(--chip);}
 .stats .st .lbl{color:var(--sub);font-size:.7rem;text-transform:uppercase;}
 .stats .st .val{font-weight:700;font-size:.9rem;margin-top:2px;}
-.mode-section{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px 20px;box-shadow:var(--shadow);margin-bottom:18px;}
 .mode-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px;}
-.mode-header h2{font-size:1rem;font-weight:700;}
 .mode-btns{display:flex;gap:10px;}
-.mode-btn{background:var(--card);color:var(--text);border:2px solid var(--border);border-radius:999px;padding:10px 24px;font-size:.9rem;cursor:pointer;font-weight:700;display:flex;align-items:center;gap:8px;}
+.mode-btn{background:var(--card);color:var(--text);border:2px solid var(--border);border-radius:999px;padding:10px 24px;font-size:.9rem;cursor:pointer;font-weight:700;}
 .mode-btn.active{background:var(--accent);color:#fff;border-color:var(--accent);}
 .mode-btn.active.manual-active{background:var(--warn);border-color:var(--warn);}
 .manual-grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));}
-.manual-card{background:var(--chip);border:1px solid var(--border);border-radius:14px;padding:16px;display:flex;flex-direction:column;align-items:center;gap:12px;transition:all .3s;}
+.manual-card{background:var(--chip);border:1px solid var(--border);border-radius:14px;padding:16px;display:flex;flex-direction:column;align-items:center;gap:12px;}
 .manual-card.on{border-color:var(--ok);box-shadow:0 0 0 3px rgba(16,185,129,.15);}
 .manual-card.on.peltier-on{border-color:var(--cold);box-shadow:0 0 0 3px rgba(59,130,246,.15);}
-.manual-card h3{font-size:.85rem;font-weight:700;display:flex;align-items:center;gap:6px;}
-.manual-card h3 .badge-on{font-size:.65rem;padding:2px 8px;border-radius:999px;background:rgba(16,185,129,.15);color:var(--ok);}
-.manual-card h3 .badge-off{font-size:.65rem;padding:2px 8px;border-radius:999px;background:rgba(148,163,184,.15);color:var(--sub);}
+.manual-card h3{font-size:.85rem;font-weight:700;}
+.manual-card h3 .badge-on,.manual-card h3 .badge-off{font-size:.65rem;padding:2px 8px;border-radius:999px;}
+.manual-card h3 .badge-on{background:rgba(16,185,129,.15);color:var(--ok);}
+.manual-card h3 .badge-off{background:rgba(148,163,184,.15);color:var(--sub);}
 .manual-visual{width:100px;height:100px;}
 .manual-visual svg{width:100%;height:100%;}
 .manual-visual .spin-group{transform-origin:50px 50px;transform-box:view-box;}
@@ -128,13 +119,12 @@ body.night .visual .readout{background:rgba(30,41,59,.9);color:#f1f5f9;border-co
 .switch-big input{display:none;}
 .switch-big .slider{position:absolute;inset:0;background:var(--sub);border-radius:999px;transition:.3s;}
 .switch-big .slider::before{content:'';position:absolute;width:24px;height:24px;background:#fff;border-radius:50%;top:4px;left:4px;transition:.3s;}
-.switch-big input:checked + .slider{background:var(--ok);}
-.switch-big input:checked + .slider::before{transform:translateX(28px);}
-.switch-big.peltier-switch input:checked + .slider{background:var(--cold);}
+.switch-big input:checked+.slider{background:var(--ok);}
+.switch-big input:checked+.slider::before{transform:translateX(28px);}
+.switch-big.peltier-switch input:checked+.slider{background:var(--cold);}
 .switch-label{font-size:.7rem;color:var(--sub);text-transform:uppercase;font-weight:600;}
 .chart-wrap{position:relative;height:240px;margin-bottom:8px;}
 canvas{width:100%;height:100%;display:block;}
-footer{text-align:center;color:var(--sub);font-size:.75rem;padding:24px 0 8px;}
 .chart-controls{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:center;}
 .chart-controls select{padding:8px 12px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:.8rem;}
 .log-table{width:100%;border-collapse:collapse;font-size:.82rem;}
@@ -149,865 +139,460 @@ footer{text-align:center;color:var(--sub);font-size:.75rem;padding:24px 0 8px;}
 .log-scroll{max-height:320px;overflow-y:auto;border:1px solid var(--border);border-radius:10px;}
 .loading{text-align:center;color:var(--sub);padding:20px;font-size:.85rem;}
 .spinner{display:inline-block;width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;vertical-align:middle;margin-right:6px;}
+footer{text-align:center;color:var(--sub);font-size:.75rem;padding:24px 0 8px;}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <div class="header">
-    <div class="logo day" id="logo"></div>
-    <div class="title-block" onclick="showAbout()" title="Klik untuk info proyek">
-      <h1>Monitoring Suhu Rak Server <span class="info-icon">ⓘ</span></h1>
-      <div class="sub">ESP32-S3 · MQTT + Firebase · Politeknik Negeri Indramayu</div>
-    </div>
-    <div class="toolbar">
-      <button id="btnRefresh" onclick="doRefresh()"><span id="refreshIcon">🔄</span> Refresh</button>
-      <button class="primary" onclick="exportExcel()">📊 Excel</button>
-      <button id="themeBtn" onclick="toggleTheme()">🌙 Malam</button>
-    </div>
-  </div>
-
-  <div class="banner">
-    <b>ℹ️ Info:</b> Klik <b>judul</b> untuk info proyek. <b>Refresh</b> hanya manual (klik tombol). Setting interval simpan Firebase di panel bawah.
-  </div>
-
-  <div class="statusbar">
-    <div class="item"><span class="dot" id="mqttDot"></span> MQTT: <b id="mqttStatus">Menghubungkan...</b></div>
-    <div class="item"><span class="dot fb" id="fbDot"></span> Firebase: <b id="fbStatus">Menghubungkan...</b></div>
-    <div class="item">Device: <b id="deviceStatus">Offline</b></div>
-    <div class="item">Server: <b id="serverTime">--</b></div>
-    <div class="item">Update: <b id="lastUpdate">--</b></div>
-    <div class="item">RSSI: <b id="rssi">--</b></div>
-    <div class="item">IP: <b id="ip">--</b></div>
-    <div class="item">Heap: <b id="heap">--</b></div>
-    <div class="item">Total log: <b id="totalLog">--</b></div>
-  </div>
-
-  <div class="setpoint-card">
-    <h2>⚙️ Pengaturan Setpoint Suhu & Interval</h2>
-    <div class="sp-grid">
-      <div class="sp-item">
-        <label>🌡️ Batas Bawah</label>
-        <input type="number" step="0.5" id="spMin" value="18.0">
-        <div class="hint">Proteksi dingin (Peltier OFF jika suhu di bawah ini)</div>
-      </div>
-      <div class="sp-item">
-        <label>🔥 Batas Atas</label>
-        <input type="number" step="0.5" id="spMax" value="28.0">
-        <div class="hint">Peltier ON jika suhu ≥ nilai ini</div>
-      </div>
-      <div class="sp-item">
-        <label>❄️ Histeresis</label>
-        <input type="number" step="0.5" id="spOff" value="22.5">
-        <div class="hint">Peltier OFF jika suhu ≤ nilai ini</div>
-      </div>
-      <div class="sp-item">
-        <label>⏱️ Interval Simpan Firebase</label>
-        <select id="fbInterval">
-          <option value="2000">2 detik</option>
-          <option value="5000">5 detik</option>
-          <option value="10000" selected>10 detik</option>
-          <option value="30000">30 detik</option>
-          <option value="60000">1 menit</option>
-          <option value="300000">5 menit</option>
-        </select>
-        <div class="hint">Seberapa sering ESP32 simpan ke Firebase</div>
-      </div>
-    </div>
-    <div class="sp-actions">
-      <button class="save" onclick="saveSetpoint()">💾 Simpan Semua</button>
-      <button class="reset" onclick="loadSetpoint()">🔄 Muat Ulang dari ESP32</button>
-    </div>
-    <div class="sp-status" id="spStatus"></div>
-  </div>
-
-  <div class="sensor-grid">
-    <div class="sensor-card primary">
-      <div class="sensor-head">
-        <div class="name">🌡️ Suhu Rak Server</div>
-        <div class="badge" id="badgeRak">Menunggu</div>
-      </div>
-      <div class="visual">
-        <div class="readout"><span id="tRak">--</span><span class="u">°C</span></div>
-        <div class="illus-wrap" id="rackWrap">
-          <svg viewBox="0 0 150 190">
-            <rect x="25" y="175" width="10" height="10" rx="2" fill="#1e293b"/>
-            <rect x="115" y="175" width="10" height="10" rx="2" fill="#1e293b"/>
-            <rect x="20" y="35" width="110" height="145" rx="6" fill="#334155" stroke="#0f172a" stroke-width="2"/>
-            <rect x="25" y="40" width="100" height="135" rx="4" fill="#1e293b"/>
-            <rect x="30" y="45" width="90" height="28" rx="3" fill="#475569" stroke="#0f172a" stroke-width="1.5"/>
-            <circle class="rack-led" cx="38" cy="59" r="2.5" fill="#22c55e"/>
-            <rect x="54" y="55" width="30" height="8" rx="1.5" fill="#0f172a"/>
-            <rect x="88" y="55" width="28" height="8" rx="1.5" fill="#0f172a"/>
-            <rect x="30" y="77" width="90" height="28" rx="3" fill="#475569" stroke="#0f172a" stroke-width="1.5"/>
-            <circle class="rack-led" cx="38" cy="91" r="2.5" fill="#22c55e"/>
-            <rect x="54" y="87" width="30" height="8" rx="1.5" fill="#0f172a"/>
-            <rect x="88" y="87" width="28" height="8" rx="1.5" fill="#0f172a"/>
-            <rect x="30" y="109" width="90" height="28" rx="3" fill="#475569" stroke="#0f172a" stroke-width="1.5"/>
-            <circle class="rack-led" cx="38" cy="123" r="2.5" fill="#22c55e"/>
-            <rect x="54" y="119" width="30" height="8" rx="1.5" fill="#0f172a"/>
-            <rect x="88" y="119" width="28" height="8" rx="1.5" fill="#0f172a"/>
-            <rect x="30" y="141" width="90" height="28" rx="3" fill="#475569" stroke="#0f172a" stroke-width="1.5"/>
-            <circle class="rack-led" cx="38" cy="155" r="2.5" fill="#22c55e"/>
-            <rect x="54" y="151" width="30" height="8" rx="1.5" fill="#0f172a"/>
-            <rect x="88" y="151" width="28" height="8" rx="1.5" fill="#0f172a"/>
-          </svg>
-        </div>
-      </div>
-      <div class="stats">
-        <div class="st"><div class="lbl">Kelembapan</div><div class="val"><span id="rh">--</span>%</div></div>
-        <div class="st"><div class="lbl">Setpoint</div><div class="val" id="spDisplay">--</div></div>
-        <div class="st"><div class="lbl">Status</div><div class="val" id="statusRakTxt">--</div></div>
-      </div>
-    </div>
-
-    <div class="sensor-card">
-      <div class="sensor-head">
-        <div class="name">❄️ Peltier 1</div>
-        <div class="badge">DS18B20 #1</div>
-      </div>
-      <div class="visual">
-        <div class="readout"><span id="tPel1">--</span><span class="u">°C</span></div>
-        <div class="illus-wrap" id="pelWrap1">
-          <svg viewBox="0 0 150 190">
-            <rect x="35" y="135" width="80" height="40" rx="4" fill="#1e40af" stroke="#0f172a" stroke-width="2"/>
-            <rect x="38" y="120" width="4" height="18" fill="#334155"/>
-            <rect x="46" y="120" width="4" height="18" fill="#334155"/>
-            <rect x="54" y="120" width="4" height="18" fill="#334155"/>
-            <rect x="62" y="120" width="4" height="18" fill="#334155"/>
-            <rect x="84" y="120" width="4" height="18" fill="#334155"/>
-            <rect x="92" y="120" width="4" height="18" fill="#334155"/>
-            <rect x="100" y="120" width="4" height="18" fill="#334155"/>
-            <rect x="108" y="120" width="4" height="18" fill="#334155"/>
-            <circle cx="75" cy="75" r="42" fill="none" stroke="#0f172a" stroke-width="3"/>
-            <circle cx="75" cy="75" r="37" fill="#e2e8f0"/>
-            <g class="peltier-fan-g">
-              <path d="M 75 75 C 60 70, 48 58, 55 42 C 62 32, 78 38, 82 48 C 84 56, 80 68, 75 75 Z" fill="#0f172a"/>
-              <path d="M 75 75 C 60 70, 48 58, 55 42 C 62 32, 78 38, 82 48 C 84 56, 80 68, 75 75 Z" fill="#0f172a" transform="rotate(120 75 75)"/>
-              <path d="M 75 75 C 60 70, 48 58, 55 42 C 62 32, 78 38, 82 48 C 84 56, 80 68, 75 75 Z" fill="#0f172a" transform="rotate(240 75 75)"/>
-            </g>
-            <circle cx="75" cy="75" r="11" fill="#e2e8f0" stroke="#0f172a" stroke-width="2.5"/>
-            <circle cx="75" cy="75" r="4" fill="#0f172a"/>
-            <g class="cold-mist">
-              <circle cx="75" cy="42" r="12" fill="rgba(96,165,250,.35)"/>
-              <circle cx="60" cy="38" r="8" fill="rgba(96,165,250,.25)"/>
-              <circle cx="90" cy="38" r="8" fill="rgba(96,165,250,.25)"/>
-            </g>
-            <circle class="cold-particle c1" cx="65" cy="110" r="2.5" fill="#60a5fa"/>
-            <circle class="cold-particle c2" cx="80" cy="105" r="2" fill="#60a5fa"/>
-            <circle class="cold-particle c3" cx="72" cy="108" r="2" fill="#60a5fa"/>
-            <circle class="cold-particle c4" cx="88" cy="110" r="2.5" fill="#60a5fa"/>
-          </svg>
-        </div>
-      </div>
-      <div class="stats">
-        <div class="st"><div class="lbl">Kondisi</div><div class="val" id="cond1">--</div></div>
-        <div class="st"><div class="lbl">Relay</div><div class="val" id="pel1State">--</div></div>
-        <div class="st"><div class="lbl">Target</div><div class="val">≤ 10°C</div></div>
-      </div>
-    </div>
-
-    <div class="sensor-card">
-      <div class="sensor-head">
-        <div class="name">❄️ Peltier 2</div>
-        <div class="badge">DS18B20 #2</div>
-      </div>
-      <div class="visual">
-        <div class="readout"><span id="tPel2">--</span><span class="u">°C</span></div>
-        <div class="illus-wrap" id="pelWrap2">
-          <svg viewBox="0 0 150 190">
-            <rect x="35" y="135" width="80" height="40" rx="4" fill="#1e40af" stroke="#0f172a" stroke-width="2"/>
-            <rect x="38" y="120" width="4" height="18" fill="#334155"/>
-            <rect x="46" y="120" width="4" height="18" fill="#334155"/>
-            <rect x="54" y="120" width="4" height="18" fill="#334155"/>
-            <rect x="62" y="120" width="4" height="18" fill="#334155"/>
-            <rect x="84" y="120" width="4" height="18" fill="#334155"/>
-            <rect x="92" y="120" width="4" height="18" fill="#334155"/>
-            <rect x="100" y="120" width="4" height="18" fill="#334155"/>
-            <rect x="108" y="120" width="4" height="18" fill="#334155"/>
-            <circle cx="75" cy="75" r="42" fill="none" stroke="#0f172a" stroke-width="3"/>
-            <circle cx="75" cy="75" r="37" fill="#e2e8f0"/>
-            <g class="peltier-fan-g">
-              <path d="M 75 75 C 60 70, 48 58, 55 42 C 62 32, 78 38, 82 48 C 84 56, 80 68, 75 75 Z" fill="#0f172a"/>
-              <path d="M 75 75 C 60 70, 48 58, 55 42 C 62 32, 78 38, 82 48 C 84 56, 80 68, 75 75 Z" fill="#0f172a" transform="rotate(120 75 75)"/>
-              <path d="M 75 75 C 60 70, 48 58, 55 42 C 62 32, 78 38, 82 48 C 84 56, 80 68, 75 75 Z" fill="#0f172a" transform="rotate(240 75 75)"/>
-            </g>
-            <circle cx="75" cy="75" r="11" fill="#e2e8f0" stroke="#0f172a" stroke-width="2.5"/>
-            <circle cx="75" cy="75" r="4" fill="#0f172a"/>
-            <g class="cold-mist">
-              <circle cx="75" cy="42" r="12" fill="rgba(96,165,250,.35)"/>
-              <circle cx="60" cy="38" r="8" fill="rgba(96,165,250,.25)"/>
-              <circle cx="90" cy="38" r="8" fill="rgba(96,165,250,.25)"/>
-            </g>
-            <circle class="cold-particle c1" cx="65" cy="110" r="2.5" fill="#60a5fa"/>
-            <circle class="cold-particle c2" cx="80" cy="105" r="2" fill="#60a5fa"/>
-            <circle class="cold-particle c3" cx="72" cy="108" r="2" fill="#60a5fa"/>
-            <circle class="cold-particle c4" cx="88" cy="110" r="2.5" fill="#60a5fa"/>
-          </svg>
-        </div>
-      </div>
-      <div class="stats">
-        <div class="st"><div class="lbl">Kondisi</div><div class="val" id="cond2">--</div></div>
-        <div class="st"><div class="lbl">Relay</div><div class="val" id="pel2State">--</div></div>
-        <div class="st"><div class="lbl">Target</div><div class="val">≤ 10°C</div></div>
-      </div>
-    </div>
-  </div>
-
-  <div class="mode-section">
-    <div class="mode-header">
-      <h2>⚙️ Mode Kontrol</h2>
-      <div class="mode-btns">
-        <button class="mode-btn active" id="btnAuto" onclick="setMode('auto')">🤖 AUTO</button>
-        <button class="mode-btn" id="btnManual" onclick="setMode('manual')">✋ MANUAL</button>
-      </div>
-    </div>
-    <div class="manual-grid" id="manualGrid" style="display:none;">
-      <div class="manual-card peltier-card" id="manualCardPel1">
-        <h3>❄️ Peltier 1 <span class="badge-off" id="badgePel1Manual">OFF</span></h3>
-        <div class="manual-visual">
-          <svg viewBox="0 0 100 100">
-            <circle cx="50" cy="50" r="42" fill="none" stroke="currentColor" stroke-width="2"/>
-            <circle cx="50" cy="50" r="37" fill="rgba(59,130,246,.15)"/>
-            <g class="spin-group">
-              <path d="M 50 50 C 40 46, 32 38, 37 27 C 42 20, 53 24, 56 31 C 57 37, 54 46, 50 50 Z" fill="currentColor"/>
-              <path d="M 50 50 C 40 46, 32 38, 37 27 C 42 20, 53 24, 56 31 C 57 37, 54 46, 50 50 Z" fill="currentColor" transform="rotate(120 50 50)"/>
-              <path d="M 50 50 C 40 46, 32 38, 37 27 C 42 20, 53 24, 56 31 C 57 37, 54 46, 50 50 Z" fill="currentColor" transform="rotate(240 50 50)"/>
-            </g>
-            <circle cx="50" cy="50" r="8" fill="#e2e8f0" stroke="currentColor" stroke-width="1.5"/>
-            <circle cx="50" cy="50" r="3" fill="currentColor"/>
-          </svg>
-        </div>
-        <label class="switch-big peltier-switch">
-          <input type="checkbox" id="mPel1" onchange="setRelay('pel1',this.checked)">
-          <span class="slider"></span>
-        </label>
-        <div class="switch-label">Kontrol Manual</div>
-      </div>
-
-      <div class="manual-card peltier-card" id="manualCardPel2">
-        <h3>❄️ Peltier 2 <span class="badge-off" id="badgePel2Manual">OFF</span></h3>
-        <div class="manual-visual">
-          <svg viewBox="0 0 100 100">
-            <circle cx="50" cy="50" r="42" fill="none" stroke="currentColor" stroke-width="2"/>
-            <circle cx="50" cy="50" r="37" fill="rgba(59,130,246,.15)"/>
-            <g class="spin-group">
-              <path d="M 50 50 C 40 46, 32 38, 37 27 C 42 20, 53 24, 56 31 C 57 37, 54 46, 50 50 Z" fill="currentColor"/>
-              <path d="M 50 50 C 40 46, 32 38, 37 27 C 42 20, 53 24, 56 31 C 57 37, 54 46, 50 50 Z" fill="currentColor" transform="rotate(120 50 50)"/>
-              <path d="M 50 50 C 40 46, 32 38, 37 27 C 42 20, 53 24, 56 31 C 57 37, 54 46, 50 50 Z" fill="currentColor" transform="rotate(240 50 50)"/>
-            </g>
-            <circle cx="50" cy="50" r="8" fill="#e2e8f0" stroke="currentColor" stroke-width="1.5"/>
-            <circle cx="50" cy="50" r="3" fill="currentColor"/>
-          </svg>
-        </div>
-        <label class="switch-big peltier-switch">
-          <input type="checkbox" id="mPel2" onchange="setRelay('pel2',this.checked)">
-          <span class="slider"></span>
-        </label>
-        <div class="switch-label">Kontrol Manual</div>
-      </div>
-
-      <div class="manual-card fan-card" id="manualCardFan">
-        <h3>🌀 Exhaust Fan <span class="badge-off" id="badgeFanManual">OFF</span></h3>
-        <div class="manual-visual">
-          <svg viewBox="0 0 100 100">
-            <circle cx="50" cy="50" r="42" fill="none" stroke="currentColor" stroke-width="2"/>
-            <circle cx="50" cy="50" r="37" fill="rgba(13,110,253,.15)"/>
-            <g class="spin-group">
-              <path d="M50 50 C45 40, 50 30, 50 22 C50 30, 55 40, 50 50Z" fill="currentColor"/>
-              <path d="M50 50 C60 45, 70 50, 78 50 C70 50, 60 55, 50 50Z" fill="currentColor"/>
-              <path d="M50 50 C55 60, 50 70, 50 78 C50 70, 45 60, 50 50Z" fill="currentColor"/>
-              <path d="M50 50 C40 55, 30 50, 22 50 C30 50, 40 45, 50 50Z" fill="currentColor"/>
-              <circle cx="50" cy="50" r="7" fill="#e2e8f0" stroke="currentColor" stroke-width="1.5"/>
-              <circle cx="50" cy="50" r="3" fill="currentColor"/>
-            </g>
-          </svg>
-        </div>
-        <label class="switch-big">
-          <input type="checkbox" id="mFan" onchange="setRelay('fan',this.checked)">
-          <span class="slider"></span>
-        </label>
-        <div class="switch-label">Kontrol Manual</div>
-      </div>
-    </div>
-  </div>
-
-  <div class="mode-section">
-    <h2 style="font-size:1rem;margin-bottom:14px;">📈 Trend Suhu Rak</h2>
-    <div class="chart-controls">
-      <label style="font-size:.8rem;color:var(--sub);">Rentang:</label>
-      <select id="trendRange" onchange="drawChart()">
-        <option value="20">20 titik</option>
-        <option value="50" selected>50 titik</option>
-        <option value="100">100 titik</option>
-        <option value="all">Semua data</option>
-      </select>
-      <button class="btn-sm blue" onclick="doRefresh()">🔄 Refresh Grafik</button>
-    </div>
-    <div class="chart-wrap"><canvas id="chart"></canvas></div>
-    <div style="font-size:.75rem;color:var(--sub);" id="chartRange">Menunggu data...</div>
-  </div>
-
-  <div class="mode-section">
-    <h2 style="font-size:1rem;margin-bottom:14px;">📅 Log Data Harian (Firebase)</h2>
-    <div class="log-actions">
-      <button class="btn-sm green" onclick="downloadToday()">⬇️ Download Hari Ini</button>
-      <button class="btn-sm blue" onclick="downloadAll()">⬇️ Download Semua</button>
-      <button class="btn-sm" onclick="loadFirebaseDates()">🔄 Muat Ulang Log</button>
-      <button class="btn-sm red" onclick="clearAllLogs()">🗑️ Hapus Semua</button>
-    </div>
-    <div class="log-scroll">
-      <table class="log-table">
-        <thead>
-          <tr><th>Tanggal</th><th>Jumlah Titik</th><th>Mulai</th><th>Selesai</th><th>Rata-rata</th><th>Aksi</th></tr>
-        </thead>
-        <tbody id="logBody"><tr><td colspan="6" class="loading"><span class="spinner"></span>Memuat data Firebase...</td></tr></tbody>
-      </table>
-    </div>
-  </div>
-
-  <footer>ESP32-S3 · MQTT + Firebase · Politeknik Negeri Indramayu · © 2025</footer>
+<div class="header">
+<div class="logo day" id="logo"></div>
+<div class="title-block" onclick="showAbout()">
+<h1>Monitoring Suhu Rak Server <span class="info-icon">ⓘ</span></h1>
+<div class="sub">ESP32-S3 · MQTT + Firebase · Politeknik Negeri Indramayu</div>
+</div>
+<div class="toolbar">
+<button id="btnRefresh" onclick="doRefresh()">🔄 Refresh</button>
+<button class="primary" onclick="exportExcel()">📊 Excel</button>
+<button id="themeBtn" onclick="toggleTheme()">🌙 Malam</button>
+</div>
 </div>
 
-<div class="modal-overlay" id="aboutModal" onclick="if(event.target===this)closeAbout()">
-  <div class="modal">
-    <div class="modal-header">
-      <h2>ℹ️ Tentang Proyek</h2>
-      <button class="modal-close" onclick="closeAbout()" title="Tutup">×</button>
-    </div>
-    <div class="modal-body">
-      <p><b>Monitoring Suhu Rak Server</b> adalah sistem monitoring & kontrol suhu rak server berbasis <b>ESP32-S3</b> dengan <b>MQTT</b> + <b>Firebase Realtime Database</b>. Dikembangkan di <b>Politeknik Negeri Indramayu</b>.</p>
-      <h3>🎯 Fitur Utama</h3>
-      <ul>
-        <li>ESP32 kirim data <b>langsung ke Firebase</b> (24/7)</li>
-        <li>Interval simpan Firebase <b>editable dari web</b> (2s - 5m)</li>
-        <li>Tombol <b>Refresh manual</b> (bukan auto-refresh)</li>
-        <li>Monitoring real-time DHT22 + 2× DS18B20</li>
-        <li>Setpoint editable (tersimpan di EEPROM)</li>
-        <li>Log permanen Firebase + export Excel per kolom</li>
-        <li>Grafik trend interaktif + mode malam/siang</li>
-      </ul>
-      <h3>🔧 Hardware</h3>
-      <p><span class="chip">ESP32-S3</span> <span class="chip">DHT22</span> <span class="chip">2× DS18B20</span> <span class="chip">3× Relay</span> <span class="chip">LCD I2C</span> <span class="chip">2× Peltier</span> <span class="chip">Fan</span></p>
-      <h3>⏱️ Interval Sistem</h3>
-      <ul>
-        <li>Baca sensor: <b>2 detik</b></li>
-        <li>Kirim MQTT: <b>5 detik</b></li>
-        <li>Simpan Firebase: <b>default 10 detik</b> (bisa diubah dari web)</li>
-      </ul>
-      <h3>🌐 URL</h3>
-      <p>Web: <span class="chip">monitoring-rakserver.vercel.app</span><br>WiFi Manager: <span class="chip">http://&lt;IP_ESP32&gt;</span></p>
-    </div>
-    <div class="modal-footer">
-      <button onclick="closeAbout()">Tutup</button>
-    </div>
-  </div>
+<div class="banner"><b>ℹ️ Info:</b> Interval simpan Firebase dapat diubah dari web. ESP32 menyimpan pengaturan interval dan menggunakannya untuk penyimpanan berikutnya.</div>
+
+<div class="statusbar">
+<div class="item"><span class="dot" id="mqttDot"></span> MQTT: <b id="mqttStatus">Menghubungkan...</b></div>
+<div class="item"><span class="dot fb" id="fbDot"></span> Firebase: <b id="fbStatus">Menghubungkan...</b></div>
+<div class="item">Device: <b id="deviceStatus">Offline</b></div>
+<div class="item">Server: <b id="serverTime">--</b></div>
+<div class="item">Update: <b id="lastUpdate">--</b></div>
+<div class="item">RSSI: <b id="rssi">--</b></div>
+<div class="item">IP: <b id="ip">--</b></div>
+<div class="item">Heap: <b id="heap">--</b></div>
+<div class="item">Total log: <b id="totalLog">--</b></div>
 </div>
+
+<div class="setpoint-card">
+<h2>⚙️ Pengaturan Setpoint Suhu & Interval</h2>
+<div class="sp-grid">
+<div class="sp-item"><label>🌡️ Batas Bawah</label><input type="number" step="0.5" id="spMin" value="18.0"><div class="hint">Peltier OFF jika suhu di bawah batas bawah.</div></div>
+<div class="sp-item"><label>🔥 Batas Atas</label><input type="number" step="0.5" id="spMax" value="28.0"><div class="hint">Peltier ON jika suhu ≥ batas atas.</div></div>
+<div class="sp-item"><label>❄️ Histeresis OFF</label><input type="number" step="0.5" id="spOff" value="22.5"><div class="hint">Peltier OFF jika suhu ≤ nilai ini.</div></div>
+<div class="sp-item"><label>⏱️ Interval Simpan Firebase</label>
+<select id="fbInterval">
+<option value="2000">2 detik</option>
+<option value="5000">5 detik</option>
+<option value="10000" selected>10 detik</option>
+<option value="30000">30 detik</option>
+<option value="60000">1 menit</option>
+<option value="300000">5 menit</option>
+<option value="600000">10 menit</option>
+<option value="1800000">30 menit</option>
+<option value="3600000">60 menit</option>
+</select>
+<div class="hint">Interval penyimpanan ESP32 ke Firebase.</div>
+</div>
+</div>
+<div class="sp-actions">
+<button class="save" onclick="saveSetpoint()">💾 Simpan Semua</button>
+<button class="reset" onclick="loadSetpoint()">🔄 Muat Ulang dari ESP32</button>
+</div>
+<div class="sp-status" id="spStatus"></div>
+</div>
+
+<div class="sensor-grid">
+<div class="sensor-card primary">
+<div class="sensor-head"><div class="name">🌡️ Suhu Rak Server</div><div class="badge" id="badgeRak">Menunggu</div></div>
+<div class="visual">
+<div class="readout"><span id="tRak">--</span><span class="u">°C</span></div>
+<div class="illus-wrap" id="rackWrap"><svg viewBox="0 0 150 190">
+<rect x="25" y="175" width="10" height="10" rx="2" fill="#1e293b"/><rect x="115" y="175" width="10" height="10" rx="2" fill="#1e293b"/>
+<rect x="20" y="35" width="110" height="145" rx="6" fill="#334155" stroke="#0f172a" stroke-width="2"/><rect x="25" y="40" width="100" height="135" rx="4" fill="#1e293b"/>
+<rect x="30" y="45" width="90" height="28" rx="3" fill="#475569"/><circle class="rack-led" cx="38" cy="59" r="2.5" fill="#22c55e"/><rect x="54" y="55" width="30" height="8" rx="1.5" fill="#0f172a"/><rect x="88" y="55" width="28" height="8" rx="1.5" fill="#0f172a"/>
+<rect x="30" y="77" width="90" height="28" rx="3" fill="#475569"/><circle class="rack-led" cx="38" cy="91" r="2.5" fill="#22c55e"/><rect x="54" y="87" width="30" height="8" rx="1.5" fill="#0f172a"/><rect x="88" y="87" width="28" height="8" rx="1.5" fill="#0f172a"/>
+<rect x="30" y="109" width="90" height="28" rx="3" fill="#475569"/><circle class="rack-led" cx="38" cy="123" r="2.5" fill="#22c55e"/><rect x="54" y="119" width="30" height="8" rx="1.5" fill="#0f172a"/><rect x="88" y="119" width="28" height="8" rx="1.5" fill="#0f172a"/>
+<rect x="30" y="141" width="90" height="28" rx="3" fill="#475569"/><circle class="rack-led" cx="38" cy="155" r="2.5" fill="#22c55e"/><rect x="54" y="151" width="30" height="8" rx="1.5" fill="#0f172a"/><rect x="88" y="151" width="28" height="8" rx="1.5" fill="#0f172a"/>
+</svg></div></div>
+<div class="stats"><div class="st"><div class="lbl">Kelembapan</div><div class="val"><span id="rh">--</span>%</div></div><div class="st"><div class="lbl">Setpoint</div><div class="val" id="spDisplay">--</div></div><div class="st"><div class="lbl">Status</div><div class="val" id="statusRakTxt">--</div></div></div>
+</div>
+
+<div class="sensor-card">
+<div class="sensor-head"><div class="name">❄️ Peltier 1</div><div class="badge">DS18B20 #1</div></div>
+<div class="visual"><div class="readout"><span id="tPel1">--</span><span class="u">°C</span></div>
+<div class="illus-wrap" id="pelWrap1"><svg viewBox="0 0 150 190">
+<rect x="35" y="135" width="80" height="40" rx="4" fill="#1e40af"/><circle cx="75" cy="75" r="42" fill="none" stroke="#0f172a" stroke-width="3"/><circle cx="75" cy="75" r="37" fill="#e2e8f0"/>
+<g class="peltier-fan-g"><path d="M75 75 C60 70 48 58 55 42 C62 32 78 38 82 48 C84 56 80 68 75 75Z" fill="#0f172a"/><path d="M75 75 C60 70 48 58 55 42 C62 32 78 38 82 48 C84 56 80 68 75 75Z" fill="#0f172a" transform="rotate(120 75 75)"/><path d="M75 75 C60 70 48 58 55 42 C62 32 78 38 82 48 C84 56 80 68 75 75Z" fill="#0f172a" transform="rotate(240 75 75)"/></g>
+<circle cx="75" cy="75" r="11" fill="#e2e8f0" stroke="#0f172a" stroke-width="2.5"/><circle cx="75" cy="75" r="4" fill="#0f172a"/>
+<g class="cold-mist"><circle cx="75" cy="42" r="12" fill="rgba(96,165,250,.35)"/><circle cx="60" cy="38" r="8" fill="rgba(96,165,250,.25)"/><circle cx="90" cy="38" r="8" fill="rgba(96,165,250,.25)"/></g>
+<circle class="cold-particle" cx="65" cy="110" r="2.5" fill="#60a5fa"/><circle class="cold-particle" cx="80" cy="105" r="2" fill="#60a5fa"/><circle class="cold-particle" cx="72" cy="108" r="2" fill="#60a5fa"/><circle class="cold-particle" cx="88" cy="110" r="2.5" fill="#60a5fa"/>
+</svg></div></div>
+<div class="stats"><div class="st"><div class="lbl">Kondisi</div><div class="val" id="cond1">--</div></div><div class="st"><div class="lbl">Relay</div><div class="val" id="pel1State">--</div></div><div class="st"><div class="lbl">Target</div><div class="val">5–10°C</div></div></div>
+</div>
+
+<div class="sensor-card">
+<div class="sensor-head"><div class="name">❄️ Peltier 2</div><div class="badge">DS18B20 #2</div></div>
+<div class="visual"><div class="readout"><span id="tPel2">--</span><span class="u">°C</span></div>
+<div class="illus-wrap" id="pelWrap2"><svg viewBox="0 0 150 190">
+<rect x="35" y="135" width="80" height="40" rx="4" fill="#1e40af"/><circle cx="75" cy="75" r="42" fill="none" stroke="#0f172a" stroke-width="3"/><circle cx="75" cy="75" r="37" fill="#e2e8f0"/>
+<g class="peltier-fan-g"><path d="M75 75 C60 70 48 58 55 42 C62 32 78 38 82 48 C84 56 80 68 75 75Z" fill="#0f172a"/><path d="M75 75 C60 70 48 58 55 42 C62 32 78 38 82 48 C84 56 80 68 75 75Z" fill="#0f172a" transform="rotate(120 75 75)"/><path d="M75 75 C60 70 48 58 55 42 C62 32 78 38 82 48 C84 56 80 68 75 75Z" fill="#0f172a" transform="rotate(240 75 75)"/></g>
+<circle cx="75" cy="75" r="11" fill="#e2e8f0" stroke="#0f172a" stroke-width="2.5"/><circle cx="75" cy="75" r="4" fill="#0f172a"/>
+<g class="cold-mist"><circle cx="75" cy="42" r="12" fill="rgba(96,165,250,.35)"/><circle cx="60" cy="38" r="8" fill="rgba(96,165,250,.25)"/><circle cx="90" cy="38" r="8" fill="rgba(96,165,250,.25)"/></g>
+<circle class="cold-particle" cx="65" cy="110" r="2.5" fill="#60a5fa"/><circle class="cold-particle" cx="80" cy="105" r="2" fill="#60a5fa"/><circle class="cold-particle" cx="72" cy="108" r="2" fill="#60a5fa"/><circle class="cold-particle" cx="88" cy="110" r="2.5" fill="#60a5fa"/>
+</svg></div></div>
+<div class="stats"><div class="st"><div class="lbl">Kondisi</div><div class="val" id="cond2">--</div></div><div class="st"><div class="lbl">Relay</div><div class="val" id="pel2State">--</div></div><div class="st"><div class="lbl">Target</div><div class="val">5–10°C</div></div></div>
+</div>
+</div>
+
+<div class="mode-section">
+<div class="mode-header"><h2>⚙️ Mode Kontrol</h2><div class="mode-btns"><button class="mode-btn active" id="btnAuto" onclick="setMode('auto')">🤖 AUTO</button><button class="mode-btn" id="btnManual" onclick="setMode('manual')">✋ MANUAL</button></div></div>
+<div class="manual-grid" id="manualGrid" style="display:none;">
+<div class="manual-card peltier-card" id="manualCardPel1"><h3>❄️ Peltier 1 <span class="badge-off" id="badgePel1Manual">OFF</span></h3><div class="manual-visual"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="50" cy="50" r="37" fill="rgba(59,130,246,.15)"/><g class="spin-group"><path d="M50 50 C40 46 32 38 37 27 C42 20 53 24 56 31 C57 37 54 46 50 50Z" fill="currentColor"/><path d="M50 50 C40 46 32 38 37 27 C42 20 53 24 56 31 C57 37 54 46 50 50Z" fill="currentColor" transform="rotate(120 50 50)"/><path d="M50 50 C40 46 32 38 37 27 C42 20 53 24 56 31 C57 37 54 46 50 50Z" fill="currentColor" transform="rotate(240 50 50)"/></g><circle cx="50" cy="50" r="8" fill="#e2e8f0"/></svg></div><label class="switch-big peltier-switch"><input type="checkbox" id="mPel1" onchange="setRelay('pel1',this.checked)"><span class="slider"></span></label><div class="switch-label">Kontrol Manual</div></div>
+<div class="manual-card peltier-card" id="manualCardPel2"><h3>❄️ Peltier 2 <span class="badge-off" id="badgePel2Manual">OFF</span></h3><div class="manual-visual"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="50" cy="50" r="37" fill="rgba(59,130,246,.15)"/><g class="spin-group"><path d="M50 50 C40 46 32 38 37 27 C42 20 53 24 56 31 C57 37 54 46 50 50Z" fill="currentColor"/><path d="M50 50 C40 46 32 38 37 27 C42 20 53 24 56 31 C57 37 54 46 50 50Z" fill="currentColor" transform="rotate(120 50 50)"/><path d="M50 50 C40 46 32 38 37 27 C42 20 53 24 56 31 C57 37 54 46 50 50Z" fill="currentColor" transform="rotate(240 50 50)"/></g><circle cx="50" cy="50" r="8" fill="#e2e8f0"/></svg></div><label class="switch-big peltier-switch"><input type="checkbox" id="mPel2" onchange="setRelay('pel2',this.checked)"><span class="slider"></span></label><div class="switch-label">Kontrol Manual</div></div>
+<div class="manual-card fan-card" id="manualCardFan"><h3>🌀 Exhaust Fan <span class="badge-off" id="badgeFanManual">OFF</span></h3><div class="manual-visual"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="50" cy="50" r="37" fill="rgba(13,110,253,.15)"/><g class="spin-group"><path d="M50 50 C45 40 50 30 50 22 C50 30 55 40 50 50Z" fill="currentColor"/><path d="M50 50 C60 45 70 50 78 50 C70 50 60 55 50 50Z" fill="currentColor"/><path d="M50 50 C55 60 50 70 50 78 C50 70 45 60 50 50Z" fill="currentColor"/><path d="M50 50 C40 55 30 50 22 50 C30 50 40 45 50 50Z" fill="currentColor"/></g></svg></div><label class="switch-big"><input type="checkbox" id="mFan" onchange="setRelay('fan',this.checked)"><span class="slider"></span></label><div class="switch-label">Kontrol Manual</div></div>
+</div></div>
+
+<div class="mode-section">
+<h2>📈 Trend Suhu Rak</h2>
+<div class="chart-controls"><label style="font-size:.8rem;color:var(--sub);">Rentang:</label><select id="trendRange" onchange="drawChart()"><option value="20">20 titik</option><option value="50" selected>50 titik</option><option value="100">100 titik</option><option value="all">Semua data</option></select><button class="btn-sm blue" onclick="doRefresh()">🔄 Refresh Grafik</button></div>
+<div class="chart-wrap"><canvas id="chart"></canvas></div><div style="font-size:.75rem;color:var(--sub);" id="chartRange">Menunggu data...</div>
+</div>
+
+<div class="mode-section">
+<h2>📅 Log Data Harian (Firebase)</h2>
+<div class="log-actions"><button class="btn-sm green" onclick="downloadToday()">⬇️ Download Hari Ini</button><button class="btn-sm blue" onclick="downloadAll()">⬇️ Download Semua</button><button class="btn-sm" onclick="loadFirebaseDates()">🔄 Muat Ulang Log</button><button class="btn-sm red" onclick="clearAllLogs()">🗑️ Hapus Semua</button></div>
+<div class="log-scroll"><table class="log-table"><thead><tr><th>Tanggal</th><th>Jumlah Titik</th><th>Mulai</th><th>Selesai</th><th>Rata-rata</th><th>Aksi</th></tr></thead><tbody id="logBody"><tr><td colspan="6" class="loading"><span class="spinner"></span>Memuat data Firebase...</td></tr></tbody></table></div>
+</div>
+
+<footer>ESP32-S3 · MQTT + Firebase · Politeknik Negeri Indramayu · © 2026</footer>
+</div>
+
+<div class="modal-overlay" id="aboutModal" onclick="if(event.target===this)closeAbout()"><div class="modal"><div class="modal-header"><h2>ℹ️ Tentang Proyek</h2><button class="modal-close" onclick="closeAbout()">×</button></div><div class="modal-body">
+<p><b>Monitoring Suhu Rak Server</b> adalah sistem monitoring & kontrol suhu rak server berbasis <b>ESP32-S3</b> dengan <b>MQTT</b> + <b>Firebase Realtime Database</b>.</p>
+<h3>🎯 Fitur Utama</h3><ul><li>Monitoring real-time DHT22 + 2× DS18B20</li><li>Interval simpan Firebase dapat diubah dari web</li><li>Setpoint editable melalui MQTT</li><li>Log permanen Firebase</li><li>Export Excel per tanggal dan seluruh data</li><li>Grafik trend dan mode malam</li></ul>
+<h3>🔧 Hardware</h3><p><span class="chip">ESP32-S3</span><span class="chip">DHT22</span><span class="chip">2× DS18B20</span><span class="chip">3× Relay</span><span class="chip">LCD I2C</span><span class="chip">2× Peltier</span><span class="chip">Fan</span></p>
+<h3>⏱️ Interval</h3><ul><li>Baca sensor: 2 detik</li><li>Kirim MQTT: 5 detik</li><li>Simpan Firebase: default 10 detik, dapat diubah dari web</li></ul>
+</div><div class="modal-footer"><button onclick="closeAbout()">Tutup</button></div></div></div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getDatabase, ref, get, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyC3vaV1ldUOgb3LMLClzZPx63fmSei5cHw",
-  authDomain: "monitoring-rakserver.firebaseapp.com",
-  databaseURL: "https://monitoring-rakserver-default-rtdb.firebaseio.com",
-  projectId: "monitoring-rakserver",
-  storageBucket: "monitoring-rakserver.firebasestorage.app",
-  messagingSenderId: "904467456903",
-  appId: "1:904467456903:web:451c869bbbd8a0c2ca2922",
-  measurementId: "G-B22Y2K07B8"
+const firebaseConfig={
+apiKey:"AIzaSyC3vaV1ldUOgb3LMLClzZPx63fmSei5cHw",
+authDomain:"monitoring-rakserver.firebaseapp.com",
+databaseURL:"https://monitoring-rakserver-default-rtdb.firebaseio.com",
+projectId:"monitoring-rakserver",
+storageBucket:"monitoring-rakserver.firebasestorage.app",
+messagingSenderId:"904467456903",
+appId:"1:904467456903:web:451c869bbbd8a0c2ca2922",
+measurementId:"G-B22Y2K07B8"
 };
 
-const fbApp = initializeApp(firebaseConfig);
-const db = getDatabase(fbApp);
+const db=getDatabase(initializeApp(firebaseConfig));
+const MQTT_BROKER_WS='wss://broker.hivemq.com:8884/mqtt';
+const TOPIC_DATA='rak/server/rakserver/data';
+const TOPIC_STATUS='rak/server/rakserver/status';
+const TOPIC_CMD='rak/server/rakserver/command';
+const TOPIC_LWT='rak/server/rakserver/online';
 
-const MQTT_BROKER_WS = 'wss://broker.hivemq.com:8884/mqtt';
-const TOPIC_DATA     = 'rak/server/rakserver/data';
-const TOPIC_STATUS   = 'rak/server/rakserver/status';
-const TOPIC_CMD      = 'rak/server/rakserver/command';
-const TOPIC_LWT      = 'rak/server/rakserver/online';
+let client=null,history_=[],MAX_HIST=5000,lastDataTime=0,lastData=null,lastStatus=null,fbDates=[];
 
-var client = null;
-var history_ = [];
-var MAX_HIST = 5000;
-var lastDataTime = 0;
-var lastData = null;
-var lastStatus = null;
-var fbDates = [];
+function showAbout(){document.getElementById('aboutModal').classList.add('show');document.body.style.overflow='hidden';}
+function closeAbout(){document.getElementById('aboutModal').classList.remove('show');document.body.style.overflow='';}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeAbout();});
 
-function showAbout(){
-  document.getElementById('aboutModal').classList.add('show');
-  document.body.style.overflow = 'hidden';
+function localDateKey(d=new Date()){
+const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');
+return `${y}-${m}-${day}`;
 }
-function closeAbout(){
-  document.getElementById('aboutModal').classList.remove('show');
-  document.body.style.overflow = '';
+function parseRecordTime(x){
+if(x&&x.t){
+const d=new Date(x.t);
+if(!isNaN(d.getTime()))return d;
 }
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAbout(); });
+if(x&&Number.isFinite(Number(x.ts))){
+const n=Number(x.ts);
+return new Date(n<100000000000?n*1000:n);
+}
+return new Date(0);
+}
+function fmtDateTime(x){
+const d=parseRecordTime(x),p=n=>String(n).padStart(2,'0');
+if(d.getTime()===0)return '--';
+return `${p(d.getDate())}/${p(d.getMonth()+1)}/${d.getFullYear()} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
+}
+function fmtDate(x){const d=parseRecordTime(x);return d.getTime()===0?'--':d.toLocaleDateString('id-ID');}
+function fmtTime(x){const d=parseRecordTime(x);return d.getTime()===0?'--':d.toLocaleTimeString('id-ID',{hour12:false});}
 
-// ==================== REFRESH (MANUAL ONLY) ====================
 function doRefresh(){
-  var btn = document.getElementById('btnRefresh');
-  btn.classList.add('spinning');
-  setTimeout(() => btn.classList.remove('spinning'), 1000);
-
-  drawChart();
-  loadFirebaseDates();
-  if (lastData) document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('id-ID');
-  if (client && !client.connected) client.reconnect();
-
-  var original = btn.innerHTML;
-  btn.innerHTML = '<span>✅</span> Refreshed';
-  setTimeout(() => { btn.innerHTML = original; }, 1500);
+const b=document.getElementById('btnRefresh');b.classList.add('spinning');setTimeout(()=>b.classList.remove('spinning'),1000);
+drawChart();loadFirebaseDates();
+if(client&&!client.connected)client.reconnect();
+const old=b.innerHTML;b.innerHTML='✅ Refreshed';setTimeout(()=>b.innerHTML=old,1500);
 }
+function setFbStatus(text,ok){document.getElementById('fbStatus').textContent=text;document.getElementById('fbDot').className='dot fb '+(ok?'on':'off');}
 
-function setFbStatus(text, ok){
-  document.getElementById('fbStatus').textContent = text;
-  document.getElementById('fbDot').className = 'dot fb ' + (ok ? 'on' : 'off');
-}
-
-// ==================== LOAD FIREBASE (TANPA FILTER 0) ====================
 async function loadFirebaseDates(){
-  var tbody = document.getElementById('logBody');
-  tbody.innerHTML = '<tr><td colspan="6" class="loading"><span class="spinner"></span>Memuat data Firebase...</td></tr>';
-  try {
-    const snap = await get(ref(db, 'rak_logs_by_date'));
-    if (!snap.exists()){
-      fbDates = [];
-      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--sub);padding:20px;">Belum ada data log</td></tr>';
-      setFbStatus('Terhubung', true);
-      return;
-    }
-    fbDates = [];
-    snap.forEach(child => {
-      var items = [];
-      child.forEach(gc => items.push(gc.val()));
-      items.sort((a,b) => a.ts - b.ts);
-      // FILTER 0 DIHAPUS - semua data ditampilkan
-      if (items.length > 0) fbDates.push({ date: child.key, items: items });
-    });
-    fbDates.sort((a,b) => b.date.localeCompare(a.date));
-    renderLogTable();
-    setFbStatus('Terhubung', true);
-  } catch(e){
-    console.error('[FB] load error:', e);
-    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--hot);padding:20px;">Gagal: ' + e.message + '</td></tr>';
-    setFbStatus('Error', false);
-  }
+const tbody=document.getElementById('logBody');
+tbody.innerHTML='<tr><td colspan="6" class="loading"><span class="spinner"></span>Memuat data Firebase...</td></tr>';
+try{
+const snap=await get(ref(db,'rak_logs_by_date'));
+if(!snap.exists()){fbDates=[];tbody.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--sub);padding:20px;">Belum ada data log</td></tr>';document.getElementById('totalLog').textContent='0 titik';setFbStatus('Terhubung',true);return;}
+fbDates=[];
+snap.forEach(child=>{
+let items=[];
+child.forEach(gc=>{const v=gc.val();if(v&&typeof v==='object')items.push(v);});
+items.sort((a,b)=>parseRecordTime(a)-parseRecordTime(b));
+if(items.length)fbDates.push({date:child.key,items});
+});
+fbDates.sort((a,b)=>b.date.localeCompare(a.date));
+renderLogTable();setFbStatus('Terhubung',true);
+}catch(e){console.error(e);tbody.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--hot);padding:20px;">Gagal: '+e.message+'</td></tr>';setFbStatus('Error',false);}
 }
 
 function renderLogTable(){
-  var tbody = document.getElementById('logBody');
-  if (fbDates.length === 0){
-    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--sub);padding:20px;">Belum ada data</td></tr>';
-    return;
-  }
-  var html = '', totalPoints = 0;
-  fbDates.forEach(function(g){
-    var temps = g.items.map(x => Number(x.tRak));
-    var avg = temps.reduce((a,b) => a+b, 0) / temps.length;
-    var start = new Date(g.items[0].t).toLocaleTimeString('id-ID');
-    var end = new Date(g.items[g.items.length-1].t).toLocaleTimeString('id-ID');
-    totalPoints += g.items.length;
-    html += '<tr>';
-    html += '<td><b>' + g.date + '</b></td>';
-    html += '<td>' + g.items.length + ' titik</td>';
-    html += '<td>' + start + '</td>';
-    html += '<td>' + end + '</td>';
-    html += '<td>' + avg.toFixed(1) + '°C</td>';
-    html += '<td><button class="btn-sm green" onclick="downloadDate(\'' + g.date + '\')">⬇️ Excel</button> ';
-    html += '<button class="btn-sm red" onclick="deleteDate(\'' + g.date + '\')">🗑️</button></td>';
-    html += '</tr>';
-  });
-  tbody.innerHTML = html;
-  document.getElementById('totalLog').textContent = totalPoints + ' titik';
+const tbody=document.getElementById('logBody');
+if(!fbDates.length){tbody.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--sub);padding:20px;">Belum ada data</td></tr>';document.getElementById('totalLog').textContent='0 titik';return;}
+let html='',total=0;
+fbDates.forEach(g=>{
+const temps=g.items.map(x=>Number(x.tRak)).filter(Number.isFinite);
+const avg=temps.length?temps.reduce((a,b)=>a+b,0)/temps.length:0;
+const start=fmtTime(g.items[0]),end=fmtTime(g.items[g.items.length-1]);
+total+=g.items.length;
+html+=`<tr><td><b>${g.date}</b></td><td>${g.items.length} titik</td><td>${start}</td><td>${end}</td><td>${avg.toFixed(1)}°C</td><td><button class="btn-sm green" onclick="downloadDate('${g.date}')">⬇️ Excel</button> <button class="btn-sm red" onclick="deleteDate('${g.date}')">🗑️</button></td></tr>`;
+});
+tbody.innerHTML=html;document.getElementById('totalLog').textContent=total+' titik';
 }
 
 async function deleteDate(dateKey){
-  if (!confirm('Hapus log tanggal ' + dateKey + '?')) return;
-  try { await remove(ref(db, 'rak_logs_by_date/' + dateKey)); await loadFirebaseDates(); }
-  catch(e){ alert('Gagal: ' + e.message); }
+if(!confirm('Hapus log tanggal '+dateKey+'?'))return;
+try{await remove(ref(db,'rak_logs_by_date/'+dateKey));await loadFirebaseDates();}catch(e){alert('Gagal: '+e.message);}
 }
-
 async function clearAllLogs(){
-  if (!confirm('Hapus SEMUA log? Tidak bisa dibatalkan!')) return;
-  try {
-    await remove(ref(db, 'rak_logs_by_date'));
-    await remove(ref(db, 'rak_logs'));
-    await loadFirebaseDates();
-  } catch(e){ alert('Gagal: ' + e.message); }
+if(!confirm('Hapus SEMUA log Firebase? Tindakan ini tidak dapat dibatalkan.'))return;
+try{await remove(ref(db,'rak_logs_by_date'));await remove(ref(db,'rak_logs'));await loadFirebaseDates();}catch(e){alert('Gagal: '+e.message);}
 }
 
-function fmtTime(iso){
-  const d = new Date(iso);
-  const pad = n => String(n).padStart(2,'0');
-  return pad(d.getDate()) + '/' + pad(d.getMonth()+1) + '/' + d.getFullYear()
-    + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
-}
+function relayText(v){return v===true||v===1||v==='1'||v==='true'?'ON':'OFF';}
+function modeText(v){return v===true||v===1||v==='1'||v==='true'?'MANUAL':'AUTO';}
 
-// ==================== EXPORT EXCEL (TANPA FILTER 0) ====================
-function exportItemsToExcel(items, filename){
-  if (!items || items.length === 0) return alert('Tidak ada data');
-  var wsData = [
-    ['Waktu', 'Suhu Rak (°C)', 'Kelembapan (%)', 'Peltier 1 (°C)', 'Peltier 2 (°C)',
-     'Peltier (Relay)', 'Fan (Relay)', 'Mode']
-  ];
-  items.forEach(x => {
-    wsData.push([
-      fmtTime(x.t),
-      parseFloat(Number(x.tRak).toFixed(1)),
-      parseFloat(Number(x.rh).toFixed(0)),
-      parseFloat(Number(x.tPel1).toFixed(1)),
-      parseFloat(Number(x.tPel2).toFixed(1)),
-      x.peltier ? 'ON' : 'OFF',
-      x.fan ? 'ON' : 'OFF',
-      x.mode ? 'MANUAL' : 'AUTO'
-    ]);
-  });
-  var ws = XLSX.utils.aoa_to_sheet(wsData);
-  ws['!cols'] = [
-    { wch: 22 }, { wch: 14 }, { wch: 16 }, { wch: 14 },
-    { wch: 14 }, { wch: 15 }, { wch: 12 }, { wch: 10 }
-  ];
-  var range = XLSX.utils.decode_range(ws['!ref']);
-  for (var R = 1; R <= range.e.r; R++) {
-    for (var C = 1; C <= 4; C++) {
-      var addr = XLSX.utils.encode_cell({r:R, c:C});
-      if (ws[addr]) {
-        ws[addr].t = 'n';
-        ws[addr].v = Number(ws[addr].v);
-        ws[addr].z = '0.0';
-      }
-    }
-  }
-  var wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, 'Log Rak Server');
-  XLSX.writeFile(wb, filename + '.xlsx');
+function exportItemsToExcel(items,filename){
+if(!items||!items.length){alert('Tidak ada data');return;}
+const clean=items.filter(x=>x&&typeof x==='object').sort((a,b)=>parseRecordTime(a)-parseRecordTime(b));
+const rows=[['No','Tanggal','Waktu','Suhu Rak (°C)','Kelembapan (%)','Peltier 1 (°C)','Peltier 2 (°C)','Peltier (Relay)','Fan (Relay)','Mode']];
+clean.forEach((x,i)=>{
+const d=parseRecordTime(x);
+rows.push([
+i+1,
+d.getTime()?d.toLocaleDateString('id-ID'):'--',
+d.getTime()?d.toLocaleTimeString('id-ID',{hour12:false}):'--',
+Number.isFinite(Number(x.tRak))?Number(Number(x.tRak).toFixed(1)):'',
+Number.isFinite(Number(x.rh))?Number(Number(x.rh).toFixed(1)):'',
+Number.isFinite(Number(x.tPel1))?Number(Number(x.tPel1).toFixed(1)):'',
+Number.isFinite(Number(x.tPel2))?Number(Number(x.tPel2).toFixed(1)):'',
+relayText(x.peltier),relayText(x.fan),modeText(x.mode)
+]);
+});
+const ws=XLSX.utils.aoa_to_sheet(rows);
+ws['!cols']=[{wch:6},{wch:13},{wch:11},{wch:17},{wch:17},{wch:18},{wch:18},{wch:17},{wch:13},{wch:10}];
+ws['!autofilter']={ref:ws['!ref']};
+const range=XLSX.utils.decode_range(ws['!ref']);
+for(let r=1;r<=range.e.r;r++){
+for(let c=3;c<=6;c++){
+const cell=ws[XLSX.utils.encode_cell({r,c})];
+if(cell&&typeof cell.v==='number')cell.z='0.0';
+}
+}
+const wb=XLSX.utils.book_new();
+XLSX.utils.book_append_sheet(wb,ws,'Log Rak Server');
+XLSX.writeFile(wb,filename+'.xlsx');
 }
 
 function downloadDate(dateKey){
-  var g = fbDates.find(x => x.date === dateKey);
-  if (!g || g.items.length === 0) return alert('Tidak ada data');
-  exportItemsToExcel(g.items, 'Log_RakServer_' + dateKey);
+const g=fbDates.find(x=>x.date===dateKey);
+if(!g||!g.items.length){alert('Tidak ada data untuk tanggal '+dateKey);return;}
+exportItemsToExcel(g.items,'Log_RakServer_'+dateKey);
 }
-
 function downloadToday(){
-  var today = new Date().toISOString().slice(0,10);
-  downloadDate(today);
+const today=localDateKey();
+const g=fbDates.find(x=>x.date===today);
+if(!g||!g.items.length){alert('Tidak ada data untuk hari ini ('+today+')');return;}
+exportItemsToExcel(g.items,'Log_RakServer_'+today);
 }
-
-// ==================== DOWNLOAD ALL (TANPA FILTER 0) ====================
 async function downloadAll(){
-  try {
-    const snap = await get(ref(db, 'rak_logs_by_date'));
-    if (!snap.exists()) return alert('Belum ada data');
-    var arr = [];
-    snap.forEach(dateNode => { dateNode.forEach(item => arr.push(item.val())); });
-    arr.sort((a,b) => a.ts - b.ts);
-    // FILTER 0 DIHAPUS
-    if (arr.length === 0) return alert('Belum ada data');
-    exportItemsToExcel(arr, 'Log_RakServer_Semua');
-    alert('✅ Download ' + arr.length + ' baris data');
-  } catch(e){ alert('Gagal: ' + e.message); }
+try{
+const snap=await get(ref(db,'rak_logs_by_date'));
+if(!snap.exists()){alert('Belum ada data');return;}
+let arr=[];
+snap.forEach(dateNode=>dateNode.forEach(item=>{const v=item.val();if(v&&typeof v==='object')arr.push(v);}));
+arr.sort((a,b)=>parseRecordTime(a)-parseRecordTime(b));
+if(!arr.length){alert('Belum ada data');return;}
+exportItemsToExcel(arr,'Log_RakServer_Semua');
+alert('✅ Download '+arr.length+' baris data');
+}catch(e){alert('Gagal: '+e.message);}
 }
-
-// ==================== EXPORT EXCEL (TANPA FILTER 0) ====================
 async function exportExcel(){
-  try {
-    const snap = await get(ref(db, 'rak_logs_by_date'));
-    if (!snap.exists()) return alert('Belum ada data di Firebase');
-    var arr = [];
-    snap.forEach(dateNode => { dateNode.forEach(item => arr.push(item.val())); });
-    if (arr.length === 0) return alert('Belum ada data');
-    arr.sort((a,b) => a.ts - b.ts);
-    // FILTER 0 DIHAPUS
-    if (arr.length === 0) return alert('Belum ada data');
-    exportItemsToExcel(arr, 'Log_RakServer_' + new Date().toISOString().slice(0,10));
-    alert('✅ Export berhasil: ' + arr.length + ' baris');
-  } catch(e){
-    console.error(e);
-    alert('Gagal export: ' + e.message);
-  }
+try{
+const snap=await get(ref(db,'rak_logs_by_date'));
+if(!snap.exists()){alert('Belum ada data di Firebase');return;}
+let arr=[];
+snap.forEach(dateNode=>dateNode.forEach(item=>{const v=item.val();if(v&&typeof v==='object')arr.push(v);}));
+arr.sort((a,b)=>parseRecordTime(a)-parseRecordTime(b));
+if(!arr.length){alert('Belum ada data');return;}
+exportItemsToExcel(arr,'Log_RakServer_'+localDateKey());
+alert('✅ Export berhasil: '+arr.length+' baris');
+}catch(e){console.error(e);alert('Gagal export: '+e.message);}
 }
 
-function showSpStatus(msg, ok){
-  var el = document.getElementById('spStatus');
-  el.textContent = msg;
-  el.className = 'sp-status show ' + (ok ? 'ok' : 'err');
-  setTimeout(() => { el.className = 'sp-status'; }, 4000);
+function showSpStatus(msg,ok){
+const e=document.getElementById('spStatus');e.textContent=msg;e.className='sp-status show '+(ok?'ok':'err');clearTimeout(window.spTimer);window.spTimer=setTimeout(()=>e.className='sp-status',5000);
 }
-
+function formatInterval(ms){
+ms=Number(ms);
+if(ms<60000)return (ms/1000)+' detik';
+if(ms<3600000)return (ms/60000)+' menit';
+return (ms/3600000)+' jam';
+}
+function syncIntervalFromStatus(ms){
+ms=Number(ms);if(!Number.isFinite(ms))return;
+const sel=document.getElementById('fbInterval');
+const exists=[...sel.options].some(o=>Number(o.value)===ms);
+if(exists)sel.value=String(ms);
+}
 function saveSetpoint(){
-  if (!client || !client.connected) return alert('MQTT belum terhubung');
-  var mn = parseFloat(document.getElementById('spMin').value);
-  var mx = parseFloat(document.getElementById('spMax').value);
-  var of = parseFloat(document.getElementById('spOff').value);
-  var fbInt = parseInt(document.getElementById('fbInterval').value);
-
-  if (isNaN(mn) || isNaN(mx) || isNaN(of)) return showSpStatus('❌ Isi semua angka!', false);
-  if (mn >= mx) return showSpStatus('❌ Batas bawah harus < batas atas', false);
-  if (of >= mx) return showSpStatus('❌ Histeresis harus < batas atas', false);
-  if (of <= mn) return showSpStatus('❌ Histeresis harus > batas bawah', false);
-
-  client.publish(TOPIC_CMD, JSON.stringify({
-    setpoint: true, min: mn, max: mx, off: of,
-    fbInterval: fbInt
-  }));
-  showSpStatus('✅ Tersimpan: SP ' + mn + '/' + mx + '/' + of + '°C | Firebase tiap ' + (fbInt/1000) + 's', true);
+if(!client||!client.connected){alert('MQTT belum terhubung');return;}
+const mn=parseFloat(document.getElementById('spMin').value);
+const mx=parseFloat(document.getElementById('spMax').value);
+const of=parseFloat(document.getElementById('spOff').value);
+const fbInt=parseInt(document.getElementById('fbInterval').value,10);
+if(![mn,mx,of].every(Number.isFinite))return showSpStatus('❌ Isi semua angka!',false);
+if(mn>=mx)return showSpStatus('❌ Batas bawah harus < batas atas',false);
+if(of>=mx)return showSpStatus('❌ Histeresis harus < batas atas',false);
+if(of<=mn)return showSpStatus('❌ Histeresis harus > batas bawah',false);
+if(fbInt<2000||fbInt>3600000)return showSpStatus('❌ Interval harus 2 detik–60 menit',false);
+client.publish(TOPIC_CMD,JSON.stringify({setpoint:true,min:mn,max:mx,off:of,fbInterval:fbInt}),{qos:0,retain:false});
+showSpStatus('✅ Perintah dikirim: SP '+mn+'/'+mx+'/'+of+'°C · Firebase tiap '+formatInterval(fbInt),true);
 }
-
 function loadSetpoint(){
-  if (lastStatus) {
-    if (lastStatus.spMin !== undefined) document.getElementById('spMin').value = lastStatus.spMin;
-    if (lastStatus.spMax !== undefined) document.getElementById('spMax').value = lastStatus.spMax;
-    if (lastStatus.spOff !== undefined) document.getElementById('spOff').value = lastStatus.spOff;
-    if (lastStatus.fbInt !== undefined) {
-      var sel = document.getElementById('fbInterval');
-      var val = String(lastStatus.fbInt);
-      var found = false;
-      for (var i=0;i<sel.options.length;i++){
-        if (sel.options[i].value === val) { found = true; break; }
-      }
-      if (found) sel.value = val;
-    }
-    updateSpDisplay();
-    showSpStatus('🔄 Dimuat dari ESP32', true);
-  } else {
-    showSpStatus('⚠️ Belum ada data dari ESP32', false);
-  }
+if(!lastStatus)return showSpStatus('⚠️ Belum ada data status dari ESP32',false);
+if(lastStatus.spMin!==undefined)document.getElementById('spMin').value=Number(lastStatus.spMin);
+if(lastStatus.spMax!==undefined)document.getElementById('spMax').value=Number(lastStatus.spMax);
+if(lastStatus.spOff!==undefined)document.getElementById('spOff').value=Number(lastStatus.spOff);
+if(lastStatus.fbInt!==undefined)syncIntervalFromStatus(lastStatus.fbInt);
+updateSpDisplay();showSpStatus('🔄 Pengaturan dimuat dari ESP32',true);
 }
-
 function updateSpDisplay(){
-  var el = document.getElementById('spDisplay');
-  if (lastStatus && lastStatus.spMin !== undefined) {
-    el.textContent = lastStatus.spMin.toFixed(0) + '-' + lastStatus.spMax.toFixed(0) + '°C';
-    if (document.activeElement.id !== 'spMin') document.getElementById('spMin').value = lastStatus.spMin;
-    if (document.activeElement.id !== 'spMax') document.getElementById('spMax').value = lastStatus.spMax;
-    if (document.activeElement.id !== 'spOff') document.getElementById('spOff').value = lastStatus.spOff;
-  }
+const e=document.getElementById('spDisplay');
+if(lastStatus&&lastStatus.spMin!==undefined&&lastStatus.spMax!==undefined){
+e.textContent=Number(lastStatus.spMin).toFixed(0)+'-'+Number(lastStatus.spMax).toFixed(0)+'°C';
+if(document.activeElement.id!=='spMin')document.getElementById('spMin').value=Number(lastStatus.spMin);
+if(document.activeElement.id!=='spMax')document.getElementById('spMax').value=Number(lastStatus.spMax);
+if(document.activeElement.id!=='spOff'&&lastStatus.spOff!==undefined)document.getElementById('spOff').value=Number(lastStatus.spOff);
+}
+if(lastStatus&&lastStatus.fbInt!==undefined)syncIntervalFromStatus(lastStatus.fbInt);
 }
 
 function connectMQTT(){
-  setMqttStatus('Menghubungkan...', false);
-  client = mqtt.connect(MQTT_BROKER_WS, {
-    clientId: 'web_' + Math.random().toString(16).substr(2, 8),
-    clean: true, reconnectPeriod: 3000, connectTimeout: 10000
-  });
-  client.on('connect', () => {
-    setMqttStatus('Terhubung', true);
-    client.subscribe([TOPIC_DATA, TOPIC_STATUS, TOPIC_LWT]);
-  });
-  client.on('reconnect', () => setMqttStatus('Reconnect...', false));
-  client.on('close', () => setMqttStatus('Terputus', false));
-  client.on('error', (e) => { console.error(e); setMqttStatus('Error', false); });
-  client.on('message', (topic, message) => {
-    try {
-      var payload = JSON.parse(message.toString());
-      if (topic === TOPIC_DATA) handleDataMessage(payload);
-      else if (topic === TOPIC_STATUS) handleStatusMessage(payload);
-    } catch(e){ if (topic === TOPIC_LWT) updateDeviceStatus(); }
-  });
+setMqttStatus('Menghubungkan...',false);
+client=mqtt.connect(MQTT_BROKER_WS,{clientId:'web_'+Math.random().toString(16).slice(2,10),clean:true,reconnectPeriod:3000,connectTimeout:10000});
+client.on('connect',()=>{setMqttStatus('Terhubung',true);client.subscribe([TOPIC_DATA,TOPIC_STATUS,TOPIC_LWT]);});
+client.on('reconnect',()=>setMqttStatus('Reconnect...',false));
+client.on('close',()=>setMqttStatus('Terputus',false));
+client.on('error',e=>{console.error(e);setMqttStatus('Error',false);});
+client.on('message',(topic,message)=>{
+try{
+const payload=JSON.parse(message.toString());
+if(topic===TOPIC_DATA)handleDataMessage(payload);
+else if(topic===TOPIC_STATUS)handleStatusMessage(payload);
+else if(topic===TOPIC_LWT){lastDataTime=Date.now();updateDeviceStatus();}
+}catch(e){console.warn('[MQTT] payload:',message.toString());}
+});
 }
-
-function setMqttStatus(text, ok){
-  document.getElementById('mqttStatus').textContent = text;
-  document.getElementById('mqttDot').className = 'dot ' + (ok ? 'on' : 'off');
-}
-
+function setMqttStatus(text,ok){document.getElementById('mqttStatus').textContent=text;document.getElementById('mqttDot').className='dot '+(ok?'on':'off');}
 function updateDeviceStatus(){
-  var el = document.getElementById('deviceStatus');
-  var recent = (Date.now() - lastDataTime) < 30000;
-  el.textContent = recent ? 'Online' : 'Offline';
-  el.style.color = recent ? 'var(--ok)' : 'var(--hot)';
+const online=(Date.now()-lastDataTime)<30000;
+const e=document.getElementById('deviceStatus');e.textContent=online?'Online':'Offline';e.style.color=online?'var(--ok)':'var(--hot)';
 }
 
 function handleDataMessage(d){
-  lastDataTime = Date.now();
-  lastData = d;
-  updateDeviceStatus();
-  document.getElementById('tRak').textContent = Number(d.tRak).toFixed(1);
-  document.getElementById('rh').textContent = Number(d.rh).toFixed(0);
-  document.getElementById('tPel1').textContent = Number(d.tPel1).toFixed(1);
-  document.getElementById('tPel2').textContent = Number(d.tPel2).toFixed(1);
-
-  var badge = document.getElementById('badgeRak');
-  var statusTxt = document.getElementById('statusRakTxt');
-  var spMin = lastStatus ? Number(lastStatus.spMin) : 18;
-  var spMax = lastStatus ? Number(lastStatus.spMax) : 28;
-
-  if (d.tRak < spMin){ badge.textContent='DINGIN'; badge.style.background='rgba(59,130,246,.15)'; badge.style.color='#3b82f6'; statusTxt.textContent='Dingin'; }
-  else if (d.tRak > spMax){ badge.textContent='PANAS'; badge.style.background='rgba(239,68,68,.15)'; badge.style.color='#ef4444'; statusTxt.textContent='Panas'; }
-  else { badge.textContent='NORMAL'; badge.style.background='rgba(16,185,129,.15)'; badge.style.color='#10b981'; statusTxt.textContent='Stabil'; }
-
-  updateRackAnim(d.tRak);
-  document.getElementById('cond1').textContent = d.tPel1 < 5 ? 'Sangat Dingin' : (d.tPel1 > 25 ? 'Hangat' : 'Normal');
-  document.getElementById('cond2').textContent = d.tPel2 < 5 ? 'Sangat Dingin' : (d.tPel2 > 25 ? 'Hangat' : 'Normal');
-  document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('id-ID');
-
-  history_.push({ time: new Date().toISOString(), tRak: d.tRak, rh: d.rh, tPel1: d.tPel1, tPel2: d.tPel2 });
-  if (history_.length > MAX_HIST) history_.shift();
-
-  drawChart();
+lastDataTime=Date.now();lastData=d;updateDeviceStatus();
+const nums=['tRak','rh','tPel1','tPel2'];
+nums.forEach(k=>{if(d[k]===undefined)return;const e=document.getElementById(k);e.textContent=Number(d[k]).toFixed(k==='rh'?0:1);});
+const spMin=lastStatus?Number(lastStatus.spMin):18,spMax=lastStatus?Number(lastStatus.spMax):28;
+const badge=document.getElementById('badgeRak'),st=document.getElementById('statusRakTxt');
+if(Number(d.tRak)<spMin){badge.textContent='DINGIN';badge.style.background='rgba(59,130,246,.15)';badge.style.color='#3b82f6';st.textContent='Dingin';}
+else if(Number(d.tRak)>spMax){badge.textContent='PANAS';badge.style.background='rgba(239,68,68,.15)';badge.style.color='#ef4444';st.textContent='Panas';}
+else{badge.textContent='NORMAL';badge.style.background='rgba(16,185,129,.15)';badge.style.color='#10b981';st.textContent='Stabil';}
+updateRackAnim(Number(d.tRak));
+document.getElementById('cond1').textContent=Number(d.tPel1)<5?'Sangat Dingin':Number(d.tPel1)>25?'Hangat':'Normal';
+document.getElementById('cond2').textContent=Number(d.tPel2)<5?'Sangat Dingin':Number(d.tPel2)>25?'Hangat':'Normal';
+document.getElementById('lastUpdate').textContent=new Date().toLocaleTimeString('id-ID');
+history_.push({time:new Date(),tRak:Number(d.tRak),rh:Number(d.rh),tPel1:Number(d.tPel1),tPel2:Number(d.tPel2)});
+if(history_.length>MAX_HIST)history_.shift();
+drawChart();
 }
-
 function handleStatusMessage(d){
-  lastStatus = d;
-  document.getElementById('rssi').textContent = d.rssi + ' dBm';
-  document.getElementById('heap').textContent = (d.heap/1024).toFixed(1) + ' KB';
-  document.getElementById('ip').textContent = d.ip;
-  document.getElementById('serverTime').textContent = d.serverTime || '--';
+lastStatus=d;
+if(d.rssi!==undefined)document.getElementById('rssi').textContent=d.rssi+' dBm';
+if(d.heap!==undefined)document.getElementById('heap').textContent=(Number(d.heap)/1024).toFixed(1)+' KB';
+if(d.ip!==undefined)document.getElementById('ip').textContent=d.ip;
+document.getElementById('serverTime').textContent=d.serverTime||'--';
+if(d.fb!==undefined)setFbStatus(d.fb?'ESP32 OK':'ESP32 NO',!!d.fb);
+updateSpDisplay();
+if(d.fbInt!==undefined)syncIntervalFromStatus(d.fbInt);
 
-  if (d.fb !== undefined) setFbStatus(d.fb ? 'ESP32 OK' : 'ESP32 NO', !!d.fb);
-  updateSpDisplay();
-
-  var grid = document.getElementById('manualGrid');
-  var btnAuto = document.getElementById('btnAuto');
-  var btnMan = document.getElementById('btnManual');
-  if (d.manual){
-    btnMan.classList.add('active','manual-active');
-    btnAuto.classList.remove('active');
-    grid.style.display = 'grid';
-  } else {
-    btnAuto.classList.add('active');
-    btnMan.classList.remove('active','manual-active');
-    grid.style.display = 'none';
-  }
-  document.getElementById('pel1State').textContent = d.manualPel1 ? 'ON' : 'OFF';
-  document.getElementById('pel2State').textContent = d.manualPel2 ? 'ON' : 'OFF';
-  document.getElementById('mPel1').checked = d.manualPel1;
-  document.getElementById('mPel2').checked = d.manualPel2;
-  document.getElementById('mFan').checked = d.manualFan;
-
-  var b1 = document.getElementById('badgePel1Manual');
-  var b2 = document.getElementById('badgePel2Manual');
-  var bf = document.getElementById('badgeFanManual');
-  b1.textContent = d.manualPel1 ? 'ON' : 'OFF'; b1.className = d.manualPel1 ? 'badge-on' : 'badge-off';
-  b2.textContent = d.manualPel2 ? 'ON' : 'OFF'; b2.className = d.manualPel2 ? 'badge-on' : 'badge-off';
-  bf.textContent = d.manualFan ? 'ON' : 'OFF'; bf.className = d.manualFan ? 'badge-on' : 'badge-off';
-
-  var c1 = document.getElementById('manualCardPel1');
-  var c2 = document.getElementById('manualCardPel2');
-  var cf = document.getElementById('manualCardFan');
-  c1.classList.toggle('on', d.manualPel1); c1.classList.toggle('peltier-on', d.manualPel1);
-  c2.classList.toggle('on', d.manualPel2); c2.classList.toggle('peltier-on', d.manualPel2);
-  cf.classList.toggle('on', d.manualFan);
-  updatePeltierAnim(1, d.manualPel1);
-  updatePeltierAnim(2, d.manualPel2);
+const grid=document.getElementById('manualGrid'),ba=document.getElementById('btnAuto'),bm=document.getElementById('btnManual');
+if(d.manual){bm.classList.add('active','manual-active');ba.classList.remove('active');grid.style.display='grid';}
+else{ba.classList.add('active');bm.classList.remove('active','manual-active');grid.style.display='none';}
+const p1=!!d.manualPel1,p2=!!d.manualPel2,fan=!!d.manualFan;
+document.getElementById('pel1State').textContent=p1?'ON':'OFF';document.getElementById('pel2State').textContent=p2?'ON':'OFF';
+document.getElementById('mPel1').checked=p1;document.getElementById('mPel2').checked=p2;document.getElementById('mFan').checked=fan;
+const b1=document.getElementById('badgePel1Manual'),b2=document.getElementById('badgePel2Manual'),bf=document.getElementById('badgeFanManual');
+b1.textContent=p1?'ON':'OFF';b1.className=p1?'badge-on':'badge-off';b2.textContent=p2?'ON':'OFF';b2.className=p2?'badge-on':'badge-off';bf.textContent=fan?'ON':'OFF';bf.className=fan?'badge-on':'badge-off';
+document.getElementById('manualCardPel1').classList.toggle('on',p1);document.getElementById('manualCardPel1').classList.toggle('peltier-on',p1);
+document.getElementById('manualCardPel2').classList.toggle('on',p2);document.getElementById('manualCardPel2').classList.toggle('peltier-on',p2);
+document.getElementById('manualCardFan').classList.toggle('on',fan);
+updatePeltierAnim(1,p1);updatePeltierAnim(2,p2);
 }
-
-function setMode(m){
-  if (!client || !client.connected) return alert('MQTT belum terhubung');
-  client.publish(TOPIC_CMD, JSON.stringify({mode: m}));
-}
-function setRelay(name, on){
-  if (!client || !client.connected) return alert('MQTT belum terhubung');
-  client.publish(TOPIC_CMD, JSON.stringify({relay: name, state: on}));
-}
+function setMode(m){if(!client||!client.connected)return alert('MQTT belum terhubung');client.publish(TOPIC_CMD,JSON.stringify({mode:m}),{qos:0,retain:false});}
+function setRelay(name,on){if(!client||!client.connected)return alert('MQTT belum terhubung');client.publish(TOPIC_CMD,JSON.stringify({relay:name,state:on}),{qos:0,retain:false});}
 
 function updateRackAnim(temp){
-  var wrap = document.getElementById('rackWrap');
-  if (!wrap) return;
-  wrap.querySelectorAll('.rack-led').forEach(led => {
-    if (temp > 28){ led.setAttribute('fill','#ef4444'); led.classList.add('fast'); }
-    else if (temp < 18){ led.setAttribute('fill','#3b82f6'); led.classList.remove('fast'); }
-    else { led.setAttribute('fill','#22c55e'); led.classList.remove('fast'); }
-  });
+const wrap=document.getElementById('rackWrap');if(!wrap)return;
+wrap.querySelectorAll('.rack-led').forEach(led=>{
+if(temp>28){led.setAttribute('fill','#ef4444');led.classList.add('fast');}
+else if(temp<18){led.setAttribute('fill','#3b82f6');led.classList.remove('fast');}
+else{led.setAttribute('fill','#22c55e');led.classList.remove('fast');}
+});
 }
-function updatePeltierAnim(num, on){
-  var wrap = document.getElementById('pelWrap' + num);
-  if (!wrap) return;
-  wrap.classList.toggle('active', on);
-  wrap.classList.toggle('cold-active', on);
-}
+function updatePeltierAnim(num,on){const w=document.getElementById('pelWrap'+num);if(w){w.classList.toggle('active',on);w.classList.toggle('cold-active',on);}}
 
 function drawChart(){
-  var c = document.getElementById('chart');
-  var dpr = window.devicePixelRatio || 1;
-  var rect = c.getBoundingClientRect();
-  c.width = rect.width * dpr;
-  c.height = rect.height * dpr;
-  var ctx = c.getContext('2d');
-  ctx.setTransform(1,0,0,1,0,0); ctx.scale(dpr, dpr);
-  var W = rect.width, H = rect.height, pad = 40;
-  ctx.clearRect(0,0,W,H);
-
-  var rangeSel = document.getElementById('trendRange').value;
-  var data = rangeSel === 'all' ? history_ : history_.slice(-parseInt(rangeSel));
-
-  if (data.length < 2){
-    ctx.fillStyle = '#94a3b8'; ctx.font = '13px sans-serif'; ctx.textAlign = 'center';
-    ctx.fillText('Menunggu data...', W/2, H/2);
-    document.getElementById('chartRange').textContent = 'Menunggu data...';
-    return;
-  }
-  var temps = data.map(x => Number(x.tRak));
-  var minV = Math.min(...temps), maxV = Math.max(...temps);
-  var yMin = Math.floor(minV - 2), yMax = Math.ceil(maxV + 2);
-  if (yMax - yMin < 5) yMax = yMin + 5;
-
-  ctx.strokeStyle = getComputedStyle(document.body).getPropertyValue('--border').trim() || '#e5eaf1';
-  ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--sub').trim() || '#64748b';
-  ctx.lineWidth = 1; ctx.font = '10px sans-serif';
-  for (var i=0;i<=5;i++){
-    var y = pad + (H - 2*pad) * (i/5);
-    ctx.beginPath(); ctx.moveTo(pad, y); ctx.lineTo(W-pad, y); ctx.stroke();
-    var val = yMax - (yMax-yMin)*(i/5);
-    ctx.textAlign='right'; ctx.fillText(val.toFixed(0)+'°C', pad-6, y+3);
-  }
-  var xs = [], ys = [];
-  for (var j=0;j<data.length;j++){
-    xs.push(pad + (W-2*pad) * (j/(data.length-1)));
-    ys.push(pad + (H-2*pad) * (1 - (data[j].tRak - yMin)/(yMax-yMin)));
-  }
-  var grad = ctx.createLinearGradient(0,pad,0,H-pad);
-  grad.addColorStop(0,'rgba(245,158,11,.35)'); grad.addColorStop(1,'rgba(245,158,11,0)');
-  ctx.beginPath(); ctx.moveTo(xs[0], H-pad);
-  for(var k=0;k<xs.length;k++) ctx.lineTo(xs[k], ys[k]);
-  ctx.lineTo(xs[xs.length-1], H-pad); ctx.closePath();
-  ctx.fillStyle = grad; ctx.fill();
-
-  ctx.beginPath(); ctx.moveTo(xs[0], ys[0]);
-  for(var m=1;m<xs.length;m++) ctx.lineTo(xs[m], ys[m]);
-  ctx.strokeStyle = '#f59e0b'; ctx.lineWidth = 2.5; ctx.stroke();
-
-  ctx.beginPath(); ctx.arc(xs[xs.length-1], ys[ys.length-1], 4, 0, Math.PI*2);
-  ctx.fillStyle = '#f59e0b'; ctx.fill();
-  ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke();
-
-  document.getElementById('chartRange').textContent =
-    data.length + ' titik · ' + minV.toFixed(1) + '°C – ' + maxV.toFixed(1) + '°C';
+const c=document.getElementById('chart'),dpr=window.devicePixelRatio||1,rect=c.getBoundingClientRect();
+if(rect.width<=0||rect.height<=0)return;
+c.width=rect.width*dpr;c.height=rect.height*dpr;const ctx=c.getContext('2d');ctx.setTransform(1,0,0,1,0,0);ctx.scale(dpr,dpr);
+const W=rect.width,H=rect.height,pad=40;ctx.clearRect(0,0,W,H);
+const s=document.getElementById('trendRange').value,data=s==='all'?history_:history_.slice(-parseInt(s));
+if(data.length<2){ctx.fillStyle='#94a3b8';ctx.font='13px sans-serif';ctx.textAlign='center';ctx.fillText('Menunggu data...',W/2,H/2);document.getElementById('chartRange').textContent='Menunggu data...';return;}
+const temps=data.map(x=>Number(x.tRak)).filter(Number.isFinite),minV=Math.min(...temps),maxV=Math.max(...temps);
+let yMin=Math.floor(minV-2),yMax=Math.ceil(maxV+2);if(yMax-yMin<5)yMax=yMin+5;
+ctx.strokeStyle=getComputedStyle(document.body).getPropertyValue('--border').trim()||'#e5eaf1';ctx.fillStyle=getComputedStyle(document.body).getPropertyValue('--sub').trim()||'#64748b';ctx.lineWidth=1;ctx.font='10px sans-serif';
+for(let i=0;i<=5;i++){const y=pad+(H-2*pad)*(i/5);ctx.beginPath();ctx.moveTo(pad,y);ctx.lineTo(W-pad,y);ctx.stroke();const v=yMax-(yMax-yMin)*(i/5);ctx.textAlign='right';ctx.fillText(v.toFixed(0)+'°C',pad-6,y+3);}
+const xs=[],ys=[];
+for(let j=0;j<data.length;j++){xs.push(pad+(W-2*pad)*(j/(data.length-1)));ys.push(pad+(H-2*pad)*(1-(data[j].tRak-yMin)/(yMax-yMin)));}
+const grad=ctx.createLinearGradient(0,pad,0,H-pad);grad.addColorStop(0,'rgba(245,158,11,.35)');grad.addColorStop(1,'rgba(245,158,11,0)');
+ctx.beginPath();ctx.moveTo(xs[0],H-pad);for(let k=0;k<xs.length;k++)ctx.lineTo(xs[k],ys[k]);ctx.lineTo(xs.at(-1),H-pad);ctx.closePath();ctx.fillStyle=grad;ctx.fill();
+ctx.beginPath();ctx.moveTo(xs[0],ys[0]);for(let m=1;m<xs.length;m++)ctx.lineTo(xs[m],ys[m]);ctx.strokeStyle='#f59e0b';ctx.lineWidth=2.5;ctx.stroke();
+ctx.beginPath();ctx.arc(xs.at(-1),ys.at(-1),4,0,Math.PI*2);ctx.fillStyle='#f59e0b';ctx.fill();ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke();
+document.getElementById('chartRange').textContent=data.length+' titik · '+minV.toFixed(1)+'°C – '+maxV.toFixed(1)+'°C';
 }
 
-function applyTheme(n){
-  document.body.classList.toggle('night',n);
-  document.getElementById('themeBtn').textContent = n ? '☀️ Siang' : '🌙 Malam';
-  document.getElementById('logo').className = 'logo ' + (n ? 'night' : 'day');
-  localStorage.setItem('night', n?'1':'0');
-  drawChart();
-}
+function applyTheme(n){document.body.classList.toggle('night',n);document.getElementById('themeBtn').textContent=n?'☀️ Siang':'🌙 Malam';document.getElementById('logo').className='logo '+(n?'night':'day');localStorage.setItem('night',n?'1':'0');drawChart();}
 function toggleTheme(){applyTheme(!document.body.classList.contains('night'));}
-(function(){var s=localStorage.getItem('night');applyTheme(s==='1');})();
+(function(){applyTheme(localStorage.getItem('night')==='1');})();
 
-connectMQTT();
-loadFirebaseDates();
-window.addEventListener('resize', drawChart);
-setInterval(updateDeviceStatus, 5000);
+connectMQTT();loadFirebaseDates();window.addEventListener('resize',drawChart);setInterval(updateDeviceStatus,5000);
 
-window.setMode = setMode;
-window.setRelay = setRelay;
-window.doRefresh = doRefresh;
-window.toggleTheme = toggleTheme;
-window.exportExcel = exportExcel;
-window.downloadToday = downloadToday;
-window.downloadAll = downloadAll;
-window.downloadDate = downloadDate;
-window.deleteDate = deleteDate;
-window.clearAllLogs = clearAllLogs;
-window.loadFirebaseDates = loadFirebaseDates;
-window.saveSetpoint = saveSetpoint;
-window.loadSetpoint = loadSetpoint;
-window.showAbout = showAbout;
-window.closeAbout = closeAbout;
+Object.assign(window,{setMode,setRelay,doRefresh,toggleTheme,exportExcel,downloadToday,downloadAll,downloadDate,deleteDate,clearAllLogs,loadFirebaseDates,saveSetpoint,loadSetpoint,showAbout,closeAbout});
 </script>
 </body>
 </html>
