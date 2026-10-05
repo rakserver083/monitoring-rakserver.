@@ -301,27 +301,53 @@ function closeAbout(){document.getElementById('aboutModal').classList.remove('sh
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeAbout();});
 
 function localDateKey(d=new Date()){
-const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');
-return `${y}-${m}-${day}`;
+const parts=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Jakarta',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(d);
+const o={}; parts.forEach(x=>o[x.type]=x.value);
+return `${o.year}-${o.month}-${o.day}`;
 }
 function parseRecordTime(x){
 if(x&&x.t){
-const d=new Date(x.t);
+let s=String(x.t).trim();
+// DATA LAMA ESP32: waktu sudah WIB tetapi pernah diberi akhiran Z.
+// Z membuat browser menganggap nilai tersebut UTC sehingga tampil +7 jam.
+if(/Z$/i.test(s) && !/[+\-]\d{2}:?\d{2}$/.test(s.slice(0,-1))){
+  s=s.replace(/Z$/i,'+07:00');
+}
+const d=new Date(s);
 if(!isNaN(d.getTime()))return d;
 }
 if(x&&Number.isFinite(Number(x.ts))){
 const n=Number(x.ts);
-return new Date(n<100000000000?n*1000:n);
+const d=new Date(n<100000000000?n*1000:n);
+if(!isNaN(d.getTime()))return d;
 }
 return new Date(0);
 }
-function fmtDateTime(x){
-const d=parseRecordTime(x),p=n=>String(n).padStart(2,'0');
-if(d.getTime()===0)return '--';
-return `${p(d.getDate())}/${p(d.getMonth()+1)}/${d.getFullYear()} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
+function getWibParts(d){
+return new Intl.DateTimeFormat('id-ID',{timeZone:'Asia/Jakarta',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).formatToParts(d);
 }
-function fmtDate(x){const d=parseRecordTime(x);return d.getTime()===0?'--':d.toLocaleDateString('id-ID');}
-function fmtTime(x){const d=parseRecordTime(x);return d.getTime()===0?'--':d.toLocaleTimeString('id-ID',{hour12:false});}
+function fmtDateTime(x){
+const d=parseRecordTime(x);
+if(d.getTime()===0)return '--';
+const p=getWibParts(d),o={};p.forEach(v=>o[v.type]=v.value);
+return `${o.day}/${o.month}/${o.year} ${o.hour}:${o.minute}:${o.second}`;
+}
+function fmtDate(x){
+const d=parseRecordTime(x);
+if(d.getTime()===0)return '--';
+const p=getWibParts(d),o={};p.forEach(v=>o[v.type]=v.value);
+return `${o.day}/${o.month}/${o.year}`;
+}
+function fmtTime(x){
+const d=parseRecordTime(x);
+if(d.getTime()===0)return '--';
+const p=getWibParts(d),o={};p.forEach(v=>o[v.type]=v.value);
+return `${o.hour}:${o.minute}:${o.second}`;
+}
+function nowWibTime(){
+const p=getWibParts(new Date()),o={};p.forEach(v=>o[v.type]=v.value);
+return `${o.hour}:${o.minute}:${o.second}`;
+}
 
 function doRefresh(){
 const b=document.getElementById('btnRefresh');b.classList.add('spinning');setTimeout(()=>b.classList.remove('spinning'),1000);
@@ -525,7 +551,7 @@ else{badge.textContent='NORMAL';badge.style.background='rgba(16,185,129,.15)';ba
 updateRackAnim(Number(d.tRak));
 document.getElementById('cond1').textContent=Number(d.tPel1)<5?'Sangat Dingin':Number(d.tPel1)>25?'Hangat':'Normal';
 document.getElementById('cond2').textContent=Number(d.tPel2)<5?'Sangat Dingin':Number(d.tPel2)>25?'Hangat':'Normal';
-document.getElementById('lastUpdate').textContent=new Date().toLocaleTimeString('id-ID');
+document.getElementById('lastUpdate').textContent=nowWibTime();
 history_.push({time:new Date(),tRak:Number(d.tRak),rh:Number(d.rh),tPel1:Number(d.tPel1),tPel2:Number(d.tPel2)});
 if(history_.length>MAX_HIST)history_.shift();
 drawChart();
