@@ -269,7 +269,7 @@ footer{text-align:center;color:var(--sub);font-size:.75rem;padding:24px 0 8px;}
 <p><b>Monitoring Suhu Rak Server</b> adalah sistem monitoring & kontrol suhu rak server berbasis <b>ESP32-S3</b> dengan <b>MQTT</b> + <b>Firebase Realtime Database</b>.</p>
 <h3>🎯 Fitur Utama</h3><ul><li>Monitoring real-time DHT22 + 2× DS18B20</li><li>Interval simpan Firebase dapat diubah dari web</li><li>Setpoint editable melalui MQTT</li><li>Log permanen Firebase</li><li>Export Excel per tanggal dan seluruh data</li><li>Grafik trend dan mode malam</li></ul>
 <h3>🔧 Hardware</h3><p><span class="chip">ESP32-S3</span><span class="chip">DHT22</span><span class="chip">2× DS18B20</span><span class="chip">3× Relay</span><span class="chip">LCD I2C</span><span class="chip">2× Peltier</span><span class="chip">Fan</span></p>
-<h3>⏱️ Interval</h3><ul><li>Baca sensor: 2 detik</li><li>Kirim MQTT: 5 detik</li><li>Simpan Firebase: default 10 detik, dapat diubah dari web</li></ul>
+<h3>⏱️ Interval</h3><ul><li>Baca sensor: 5 detik</li><li>Kirim MQTT: 15 detik</li><li>Simpan Firebase: default 30 detik, dapat diubah dari web</li></ul>
 </div><div class="modal-footer"><button onclick="closeAbout()">Tutup</button></div></div></div>
 
 <script type="module">
@@ -308,8 +308,6 @@ return `${o.year}-${o.month}-${o.day}`;
 function parseRecordTime(x){
 if(x&&x.t){
 let s=String(x.t).trim();
-// DATA LAMA ESP32: waktu sudah WIB tetapi pernah diberi akhiran Z.
-// Z membuat browser menganggap nilai tersebut UTC sehingga tampil +7 jam.
 if(/Z$/i.test(s) && !/[+\-]\d{2}:?\d{2}$/.test(s.slice(0,-1))){
   s=s.replace(/Z$/i,'+07:00');
 }
@@ -351,7 +349,7 @@ return `${o.hour}:${o.minute}:${o.second}`;
 
 function doRefresh(){
 const b=document.getElementById('btnRefresh');b.classList.add('spinning');setTimeout(()=>b.classList.remove('spinning'),1000);
-drawChart();loadFirebaseDates();
+drawChart();loadFirebaseDates();loadLatestFromFirebase();
 if(client&&!client.connected)client.reconnect();
 const old=b.innerHTML;b.innerHTML='✅ Refreshed';setTimeout(()=>b.innerHTML=old,1500);
 }
@@ -373,6 +371,25 @@ if(items.length)fbDates.push({date:child.key,items});
 fbDates.sort((a,b)=>b.date.localeCompare(a.date));
 renderLogTable();setFbStatus('Terhubung',true);
 }catch(e){console.error(e);tbody.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--hot);padding:20px;">Gagal: '+e.message+'</td></tr>';setFbStatus('Error',false);}
+}
+
+// =====================================================
+// LOAD rak_latest DARI FIREBASE (fallback kalau MQTT offline)
+// =====================================================
+async function loadLatestFromFirebase(){
+try{
+const snap=await get(ref(db,'rak_latest'));
+if(!snap.exists()){
+console.log('[Firebase] rak_latest belum ada');
+return;
+}
+const d=snap.val();
+console.log('[Firebase] Loaded rak_latest:',d);
+if(d.tRak!==undefined)document.getElementById('tRak').textContent=Number(d.tRak).toFixed(1);
+if(d.rh!==undefined)document.getElementById('rh').textContent=Number(d.rh).toFixed(0);
+if(d.tPel1!==undefined)document.getElementById('tPel1').textContent=Number(d.tPel1).toFixed(1);
+if(d.tPel2!==undefined)document.getElementById('tPel2').textContent=Number(d.tPel2).toFixed(1);
+}catch(e){console.warn('Failed load rak_latest:',e);}
 }
 
 function renderLogTable(){
@@ -539,25 +556,64 @@ const online=(Date.now()-lastDataTime)<30000;
 const e=document.getElementById('deviceStatus');e.textContent=online?'Online':'Offline';e.style.color=online?'var(--ok)':'var(--hot)';
 }
 
+// =====================================================
+// HANDLE DATA (topik data)
+// =====================================================
 function handleDataMessage(d){
 lastDataTime=Date.now();lastData=d;updateDeviceStatus();
+
+// Update angka sensor
 const nums=['tRak','rh','tPel1','tPel2'];
-nums.forEach(k=>{if(d[k]===undefined)return;const e=document.getElementById(k);e.textContent=Number(d[k]).toFixed(k==='rh'?0:1);});
+nums.forEach(k=>{
+if(d[k]===undefined)return;
+const e=document.getElementById(k);
+e.textContent=Number(d[k]).toFixed(k==='rh'?0:1);
+});
+
+// Update badge suhu rak
 const spMin=lastStatus?Number(lastStatus.spMin):18,spMax=lastStatus?Number(lastStatus.spMax):28;
 const badge=document.getElementById('badgeRak'),st=document.getElementById('statusRakTxt');
 if(Number(d.tRak)<spMin){badge.textContent='DINGIN';badge.style.background='rgba(59,130,246,.15)';badge.style.color='#3b82f6';st.textContent='Dingin';}
 else if(Number(d.tRak)>spMax){badge.textContent='PANAS';badge.style.background='rgba(239,68,68,.15)';badge.style.color='#ef4444';st.textContent='Panas';}
 else{badge.textContent='NORMAL';badge.style.background='rgba(16,185,129,.15)';badge.style.color='#10b981';st.textContent='Stabil';}
 updateRackAnim(Number(d.tRak));
+
+// Update kondisi peltier
 document.getElementById('cond1').textContent=Number(d.tPel1)<5?'Sangat Dingin':Number(d.tPel1)>25?'Hangat':'Normal';
 document.getElementById('cond2').textContent=Number(d.tPel2)<5?'Sangat Dingin':Number(d.tPel2)>25?'Hangat':'Normal';
+
+// ================================================
+// PENTING: Update status relay dari topik DATA juga
+// ================================================
+if(d.peltier!==undefined){
+const pOn=!!d.peltier;
+document.getElementById('pel1State').textContent=pOn?'ON':'OFF';
+document.getElementById('pel2State').textContent=pOn?'ON':'OFF';
+updatePeltierAnim(1,pOn);
+updatePeltierAnim(2,pOn);
+}
+if(d.fan!==undefined){
+// (tidak ada elemen visual khusus fan di dashboard utama)
+}
+if(d.mode!==undefined){
+const ba=document.getElementById('btnAuto'),bm=document.getElementById('btnManual');
+const isManual=String(d.mode).toUpperCase()==='MANUAL';
+if(isManual){bm.classList.add('active','manual-active');ba.classList.remove('active');document.getElementById('manualGrid').style.display='grid';}
+else{ba.classList.add('active');bm.classList.remove('active','manual-active');document.getElementById('manualGrid').style.display='none';}
+}
+
 document.getElementById('lastUpdate').textContent=nowWibTime();
 history_.push({time:new Date(),tRak:Number(d.tRak),rh:Number(d.rh),tPel1:Number(d.tPel1),tPel2:Number(d.tPel2)});
 if(history_.length>MAX_HIST)history_.shift();
 drawChart();
 }
+
+// =====================================================
+// HANDLE STATUS (topik status)
+// =====================================================
 function handleStatusMessage(d){
 lastStatus=d;
+
 if(d.rssi!==undefined)document.getElementById('rssi').textContent=d.rssi+' dBm';
 if(d.heap!==undefined)document.getElementById('heap').textContent=(Number(d.heap)/1024).toFixed(1)+' KB';
 if(d.ip!==undefined)document.getElementById('ip').textContent=d.ip;
@@ -566,19 +622,44 @@ if(d.fb!==undefined)setFbStatus(d.fb?'ESP32 OK':'ESP32 NO',!!d.fb);
 updateSpDisplay();
 if(d.fbInt!==undefined)syncIntervalFromStatus(d.fbInt);
 
+// Mode AUTO/MANUAL
 const grid=document.getElementById('manualGrid'),ba=document.getElementById('btnAuto'),bm=document.getElementById('btnManual');
 if(d.manual){bm.classList.add('active','manual-active');ba.classList.remove('active');grid.style.display='grid';}
 else{ba.classList.add('active');bm.classList.remove('active','manual-active');grid.style.display='none';}
-const p1=!!d.manualPel1,p2=!!d.manualPel2,fan=!!d.manualFan;
-document.getElementById('pel1State').textContent=p1?'ON':'OFF';document.getElementById('pel2State').textContent=p2?'ON':'OFF';
-document.getElementById('mPel1').checked=p1;document.getElementById('mPel2').checked=p2;document.getElementById('mFan').checked=fan;
+
+// ================================================
+// PENTING: Status RELAY (peltier/fan) — pakai 'peltier' bukan 'manualPel1'
+// ================================================
+const peltierOn=!!d.peltier;
+const fanOn=!!d.fan;
+
+document.getElementById('pel1State').textContent=peltierOn?'ON':'OFF';
+document.getElementById('pel2State').textContent=peltierOn?'ON':'OFF';
+updatePeltierAnim(1,peltierOn);
+updatePeltierAnim(2,peltierOn);
+
+// Switch manual (dari flag manual*)
+const m1=!!d.manualPel1;
+const m2=!!d.manualPel2;
+const mfan=!!d.manualFan;
+document.getElementById('mPel1').checked=m1;
+document.getElementById('mPel2').checked=m2;
+document.getElementById('mFan').checked=mfan;
+
+// Badge manual
 const b1=document.getElementById('badgePel1Manual'),b2=document.getElementById('badgePel2Manual'),bf=document.getElementById('badgeFanManual');
-b1.textContent=p1?'ON':'OFF';b1.className=p1?'badge-on':'badge-off';b2.textContent=p2?'ON':'OFF';b2.className=p2?'badge-on':'badge-off';bf.textContent=fan?'ON':'OFF';bf.className=fan?'badge-on':'badge-off';
-document.getElementById('manualCardPel1').classList.toggle('on',p1);document.getElementById('manualCardPel1').classList.toggle('peltier-on',p1);
-document.getElementById('manualCardPel2').classList.toggle('on',p2);document.getElementById('manualCardPel2').classList.toggle('peltier-on',p2);
-document.getElementById('manualCardFan').classList.toggle('on',fan);
-updatePeltierAnim(1,p1);updatePeltierAnim(2,p2);
+b1.textContent=m1?'ON':'OFF';b1.className=m1?'badge-on':'badge-off';
+b2.textContent=m2?'ON':'OFF';b2.className=m2?'badge-on':'badge-off';
+bf.textContent=mfan?'ON':'OFF';bf.className=mfan?'badge-on':'badge-off';
+
+// Kartu manual highlight — pakai status relay (lebih akurat)
+document.getElementById('manualCardPel1').classList.toggle('on',peltierOn);
+document.getElementById('manualCardPel1').classList.toggle('peltier-on',peltierOn);
+document.getElementById('manualCardPel2').classList.toggle('on',peltierOn);
+document.getElementById('manualCardPel2').classList.toggle('peltier-on',peltierOn);
+document.getElementById('manualCardFan').classList.toggle('on',fanOn);
 }
+
 function setMode(m){if(!client||!client.connected)return alert('MQTT belum terhubung');client.publish(TOPIC_CMD,JSON.stringify({mode:m}),{qos:0,retain:false});}
 function setRelay(name,on){if(!client||!client.connected)return alert('MQTT belum terhubung');client.publish(TOPIC_CMD,JSON.stringify({relay:name,state:on}),{qos:0,retain:false});}
 
@@ -616,7 +697,11 @@ function applyTheme(n){document.body.classList.toggle('night',n);document.getEle
 function toggleTheme(){applyTheme(!document.body.classList.contains('night'));}
 (function(){applyTheme(localStorage.getItem('night')==='1');})();
 
-connectMQTT();loadFirebaseDates();window.addEventListener('resize',drawChart);setInterval(updateDeviceStatus,5000);
+connectMQTT();
+loadFirebaseDates();
+loadLatestFromFirebase();  // ← load data terakhir dari Firebase
+window.addEventListener('resize',drawChart);
+setInterval(updateDeviceStatus,5000);
 
 Object.assign(window,{setMode,setRelay,doRefresh,toggleTheme,exportExcel,downloadToday,downloadAll,downloadDate,deleteDate,clearAllLogs,loadFirebaseDates,saveSetpoint,loadSetpoint,showAbout,closeAbout});
 </script>
